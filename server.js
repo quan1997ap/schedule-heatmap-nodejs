@@ -12,7 +12,7 @@ var heatmapRouter = require('./routes/heatmap');
 
 var app = express();
 var rethinkdb = require("./schema/connect-rethinkdb"); // create connect to rethinkDB 
-var jobSchedule = require("./schema/schedule-create-heatmap"); // create connect to rethinkDB 
+// var jobSchedule = require("./schema/schedule-create-heatmap"); // create connect to rethinkDB 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
