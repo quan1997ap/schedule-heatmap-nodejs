@@ -12,7 +12,7 @@ var heatmapRouter = require('./routes/heatmap');
 
 var app = express();
 var rethinkdb = require("./schema/connect-rethinkdb"); // create connect to rethinkDB 
-// var jobSchedule = require("./schema/schedule-create-heatmap"); // create connect to rethinkDB 
+var jobSchedule = require("./schema/schedule-create-heatmap"); // create connect to rethinkDB 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -46,9 +46,6 @@ app.use(function(err, req, res, next) {
 });
 
 
-var port = process.env.PORT || 3000;
-app.listen(port, "0.0.0.0", function() {
-console.log("Listening on Port 3000");
-});
-
+const port = 3000;
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 module.exports = app;
