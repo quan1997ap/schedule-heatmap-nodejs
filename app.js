@@ -46,8 +46,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-var port_number = server.listen(process.env.PORT || 8080);
-app.listen(port_number);
-
+const port = 3000;
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 module.exports = app;
 //https://devcenter.heroku.com/articles/error-codes
