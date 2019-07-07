@@ -373,7 +373,7 @@ async function mainFunction() {
 }
 
 let runTaskDrawHeatMap = () => {
-  schedule.scheduleJob({ start: startTime, rule: "*/2 * * * * *" }, function() {
+  schedule.scheduleJob({ start: startTime, rule: "*/15 * * * *" }, function() {
     // mainFunction();
     console.log('run')
   });
