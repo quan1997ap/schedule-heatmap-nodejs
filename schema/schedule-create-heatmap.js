@@ -379,3 +379,4 @@ let runTaskDrawHeatMap = () => {
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
+
