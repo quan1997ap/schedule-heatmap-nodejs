@@ -1,12 +1,13 @@
-var schedule = require("node-schedule");
 var axios = require("axios");
 var TemperatureMap = require("../public/javascript-librarys/temperatureMap");
 const { createCanvas, loadImage } = require("canvas");
 var axios = require("axios");
 const fs = require("fs"); // di tu thu muc goc cua ung  dung
 let provinceData, enviObjectData;
+
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);
+var schedule = require("node-schedule");
 var rethinkdb = require("../schema/connect-rethinkdb");
 
 // https://www.npmjs.com/package/node-schedule
@@ -273,7 +274,7 @@ function writeFile(pathname, content) {
   });
 }
 
-function getCurrentTime(){
+function getCurrentTime() {
   let currentdate = new Date();
   let datetime =
     "Run at : " +
@@ -291,12 +292,10 @@ function getCurrentTime(){
   return datetime;
 }
 
-function insertDataToTable( heatmapData) {
-  r.db('quandev')
-  r.table('heatmaps')
-    .insert([
-      { heatmap: heatmapData , create_at: getCurrentTime() },
-    ])
+function insertDataToTable(heatmapData) {
+  r.db("quandev");
+  r.table("heatmaps")
+    .insert([{ heatmap: heatmapData, create_at: getCurrentTime() }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -366,19 +365,17 @@ async function mainFunction() {
         number_X,
         "temperature"
       ); //temperature humidity AQI
-      insertDataToTable( heatMapImg );
-      console.log('heatMap created')
+      insertDataToTable(heatMapImg);
+      console.log("heatMap created");
       // writeFile("./public/json/heatmap.txt", heatMapImg);
     }
   });
 }
 
-// let  = mainFunction();
-let runTaskDrawHeatMap = schedule.scheduleJob(
-  { start: startTime, rule: '12 * * * *' },
-  function() {
-   mainFunction();
-  }
-);
+let runTaskDrawHeatMap = () => {
+  schedule.scheduleJob({ start: startTime, rule: "*/10 * * * * *" }, function() {
+    mainFunction();
+  });
+};
 
-
+module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
