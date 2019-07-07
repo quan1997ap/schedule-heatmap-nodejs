@@ -31,7 +31,7 @@ router.get("/", (request, response) => {
 });
 
 router.get("/active", (request, response) => {
-  console.log('start schedule');
+  // console.log('start schedule');
   createHeatMap.runTaskDrawHeatMap();
   response.send('active success');
   response.end();
