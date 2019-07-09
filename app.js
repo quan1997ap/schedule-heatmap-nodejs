@@ -8,7 +8,7 @@ var cors = require('cors');
 // import router
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
-
+//var createHeatmap = require('./schema/schedule-create-heatmap');
 
 var app = express();
 

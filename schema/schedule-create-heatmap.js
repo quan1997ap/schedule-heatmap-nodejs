@@ -39,8 +39,10 @@ function createHeatMapBase64(
   // drw0.drawFull(true, function () { });
 
   // mức độ chi tiết vừa
-  // drw0.setDataPoints(knownPoints, boundaryCanvas ,width, height);
-  // drw0.drawFull(false, function () { drw0.drawPoints(); });
+  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
+  // drw0.drawFull(false, function() {
+  //   drw0.drawPoints();
+  // });
 
   // mức độ chi tiết thấp
   drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
@@ -48,67 +50,6 @@ function createHeatMapBase64(
 
   return canvas.toDataURL();
 }
-
-// function distanceBetween2Points(la1, lo1, la2, lo2) {
-//   var R = 6.371;
-//   var dLat = (la2 - la1) * (Math.PI / 180);
-//   var dLon = (lo2 - lo1) * (Math.PI / 180);
-//   var la1ToRad = la1 * (Math.PI / 180);
-//   var la2ToRad = la2 * (Math.PI / 180);
-//   var a =
-//     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-//     Math.cos(la1ToRad) *
-//       Math.cos(la2ToRad) *
-//       Math.sin(dLon / 2) *
-//       Math.sin(dLon / 2);
-//   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//   var d = R * c;
-//   return d;
-// }
-// // nội suy điểm từ mảng đã biết
-// function interpolationBoundary(interpolationArr, knowPointArr, p) {
-//   var boundaryInterpolation = [];
-//   let interpolationArrLength = interpolationArr.length;
-//   let knowPointArrLength = knowPointArr.length;
-
-//   for (let i = 0; i < interpolationArrLength; i++) {
-//     var tuso = 0;
-//     var mauso = 0;
-//     for (var j = 0; j < knowPointArrLength; j++) {
-//       tuso =
-//         tuso +
-//         knowPointArr[j].value /
-//           Math.pow(
-//             distanceBetween2Points(
-//               interpolationArr[i].x,
-//               interpolationArr[i].y,
-//               knowPointArr[j].x,
-//               knowPointArr[j].y
-//             ),
-//             p
-//           );
-//       mauso =
-//         mauso +
-//         1 /
-//           Math.pow(
-//             distanceBetween2Points(
-//               interpolationArr[i].x,
-//               interpolationArr[i].y,
-//               knowPointArr[j].x,
-//               knowPointArr[j].y
-//             ),
-//             p
-//           );
-//     }
-//     boundaryInterpolation.push({
-//       x: interpolationArr[i].x,
-//       y: interpolationArr[i].y,
-//       value: parseFloat((tuso / mauso).toFixed(3))
-//     });
-//   }
-
-//   return boundaryInterpolation;
-// }
 
 function getBoundingBoxRectangle(boundingArr) {
   let minLat, maxLat, minLng, maxLng;
@@ -129,14 +70,6 @@ function getBoundingBoxRectangle(boundingArr) {
     }
   });
   return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
-
-  // console.log(minLat, maxLat, minLng, maxLng);
-  // ho chi minh hcn
-  //  {lat: 10.1399458, lng: 106.3567159},
-  //  {lat: 10.1399458, lng: 107.0276712},
-  //  {lat: 11.1595357, lng: 107.0276712},
-  //  {lat: 11.1595357, lng: 106.3567159}
-  // getBoundingBoxRectangle(provinceData[0].boundary);
 }
 
 function getBoundingOfProvinceById(provinceId, provinceList) {
@@ -162,8 +95,8 @@ function getBoundingOfProvinceById(provinceId, provinceList) {
 
 function getCurrentWeatherData() {
   return new Promise((resolve, reject) => {
-    var aqiData, tempData, pm25Data, humidityData;
     var weatherData = [];
+    var allStationData = [];
     axios
       .post("https://pamair.org/pamenviad/no/ref/122", { method: "get" })
       .then(resPHHAPI => {
@@ -171,9 +104,6 @@ function getCurrentWeatherData() {
         let currentData = resPHHAPI.data.PHHAPI.body; // du lieu cua cac tinh
         if (currentData.length > 0) {
           currentData.forEach(provinceData => {
-            let averageTempVal = 0;
-            let countStationInProvince = 0;
-
             let stationDataOfProvince = Object.create({});
             if (provinceData.children.length > 0) {
               // du lieu cua cac tinh
@@ -220,6 +150,7 @@ function getCurrentWeatherData() {
                       : -999999;
 
                     stationData.value = valueTemp;
+                    //  stationData.value = AQI;
 
                     stationData.aqi_us_1h_longtime =
                       subdistrictData.aqi_us_1h_longtime;
@@ -233,19 +164,16 @@ function getCurrentWeatherData() {
                     if (stationData.value != -999999) {
                       // chỉ lấy các điểm có dữ liệu
                       stationDataOfProvince.stationList.push(stationData);
-                      countStationInProvince++;
-                      averageTempVal += parseFloat(stationData.value);
+                      allStationData.push(stationData);
                     }
                   });
                 }
               });
-              averageTempVal = averageTempVal / countStationInProvince;
-              stationDataOfProvince.averageTempVal = averageTempVal;
             }
             weatherData.push(stationDataOfProvince);
           });
         }
-        resolve(weatherData);
+        resolve([weatherData, allStationData]);
       })
       .catch(err => reject(err));
   });
@@ -308,33 +236,39 @@ function insertDataToTable(heatmapData) {
 }
 
 async function mainFunction() {
-  const degX = 0.00929791 / 5; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
-  const degY = 0.00903758 / 5; // degX <=> 100m 1 ô
+  const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
+  const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
 
   let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
   let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
   let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại;
 
-  currentWeatherData.forEach(weatherData => {
+  currentWeatherData[0].forEach(weatherData => {
+    // kiểm tra tỉnh này có trong danh sách cáct tỉnh đủ điều kiện tạo heatnao chua
     let resCheckProvince = getBoundingOfProvinceById(
       weatherData.districtId,
       provinceList
     );
+
     if (resCheckProvince.result === true) {
       // nếu tỉnh nằm  trong các tỉnh đã có dữ liệu boundary => tạo heat map
       // boundary của tỉnh sẽ vẽ canvas
       let boundaryProvinceCanvas = resCheckProvince.boundary;
+
       // lấy các giá trị của hình chữ nhật bao quanh canvas( sử dụng để gán heatMapImg trên ggmap)
+      // boundaryProvinceCanvas : viền bao quanh của tỉnh
+      // boundingBoxRectangle : khung viền hình chữ nhật
+
       let boundingBoxRectangle = getBoundingBoxRectangle(
         boundaryProvinceCanvas
       );
+
       let minLat = boundingBoxRectangle.minLat;
       let maxLat = boundingBoxRectangle.maxLat;
       let minLng = boundingBoxRectangle.minLng;
       let maxLng = boundingBoxRectangle.maxLng;
 
-      let tbc = weatherData.averageTempVal;
-      let number_X = parseInt((maxLat - minLat) / degX); // width height Canvas (theo số ô) // số ô  trên 1 trục(1 ô có chiều rộng 0.1 km)
+      let number_X = parseInt((maxLat - minLat) / degX); // width height Canvas (theo số ô) // số ô  trên 1 trục(1 ô có chiều rộng 0.1 km = 100m)
       let number_Y = parseInt((maxLng - minLng) / degY);
 
       //tạo boundary với dữ liệu nội suy
@@ -349,13 +283,31 @@ async function mainFunction() {
 
       // mảng các điểm đã biết
       let knownPoints = [];
-      for (let k = 0; k < weatherData.stationList.length - 1; k++) {
-        knownPoints.push({
-          y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
-          x: parseInt((weatherData.stationList[k].lng - minLng) / degY),
-          value: weatherData.stationList[k].value
-        });
+
+      let knowPointLength = currentWeatherData[1].length;
+      for (let i = 0; i < knowPointLength; i++) {
+        if (
+          minLat <= currentWeatherData[1][i].lat &&
+          minLng <= currentWeatherData[1][i].lng &&
+          maxLat >= currentWeatherData[1][i].lat &&
+          maxLng >= currentWeatherData[1][i].lng
+        ) {
+          knownPoints.push({
+            y: parseInt((currentWeatherData[1][i].lat - minLat) / degX),
+            x: parseInt((currentWeatherData[1][i].lng - minLng) / degY),
+            value: currentWeatherData[1][i].value
+          });
+        }
       }
+
+      // for (let k = 0; k < weatherData.stationList.length; k++) {
+      //   knownPoints.push({
+      //     y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
+      //     x: parseInt((weatherData.stationList[k].lng - minLng) / degY),
+      //     value: weatherData.stationList[k].value
+      //   });
+      // }
+
       var pointAffectNumber = knownPoints.length;
       let heatMapImg = createHeatMapBase64(
         pointAffectNumber,
@@ -363,15 +315,18 @@ async function mainFunction() {
         boundaryOfHeatMapCanvas,
         number_Y,
         number_X,
-        "temperature"
-      ); //temperature humidity AQI
+        "tempHLS"
+      ); //temperature humidity AQI tempHLS
       insertDataToTable(heatMapImg);
+
       console.log("heatMap created");
-      // writeFile("./public/json/heatmap.txt", heatMapImg);
+      writeFile("./public/json/heatmap.txt", heatMapImg);
+      // writeFile("./public/json/heatmap.txt", JSON.stringify(knownPoints));
     }
   });
 }
 
+let start = mainFunction();
 let runTaskDrawHeatMap = () => {
   schedule.scheduleJob({ start: startTime, rule: "*/15 * * * *" }, function() {
     mainFunction();
@@ -380,4 +335,3 @@ let runTaskDrawHeatMap = () => {
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
-
