@@ -229,7 +229,7 @@ function insertDataToTable(heatmapData) {
         console.log(err);
       } else {
         {
-          console.log(res);
+          console.log(res, getCurrentTime());
         }
       }
     });
