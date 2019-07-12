@@ -318,18 +318,23 @@ async function mainFunction() {
         number_X,
         "AQI"
       ); //temperature humidity AQI tempHLS
-      insertDataToTable(heatMapImg);
+      // insertDataToTable(heatMapImg);
+
       console.log("heatMap created");
+      writeFile("./public/json/heatmap.txt", heatMapImg);
+      // writeFile("./public/json/heatmap.txt", JSON.stringify(knownPoints));
     }
   });
 }
 
 let start = mainFunction();
-let runTaskDrawHeatMap = () => {
-  schedule.scheduleJob({ start: startTime, rule: '*/15 * * * *' }, function() {
-    mainFunction();
-    console.log('run')
-  });
-};
+// let runTaskDrawHeatMap = () => {
+//   schedule.scheduleJob({ start: startTime, rule: "*/15 * * * *" }, function() {
+//     mainFunction();
+//     console.log('run')
+//   });
+// };
 
-module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
+// module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
+
+module.exports = mainFunction;
