@@ -220,10 +220,10 @@ function getCurrentTime() {
   return datetime;
 }
 
-function insertDataToTable(heatmapData) {
+function insertDataToTable(heatmapData, heatmapType) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmap: heatmapData, create_at: getCurrentTime() }])
+    .insert([{ heatmapType: heatmapType, heatmap: heatmapData, create_at: getCurrentTime() }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -237,8 +237,7 @@ function insertDataToTable(heatmapData) {
 
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
-  const degY = 0.00903758 / 10;
-  ; // degX <=> 100m 1 ô
+  const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
 
   let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
   let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
@@ -318,7 +317,7 @@ async function mainFunction() {
         number_X,
         "AQI"
       ); //temperature humidity AQI tempHLS
-      insertDataToTable(heatMapImg);
+      insertDataToTable(heatMapImg, "AQI");
       console.log("heatMap created");
     }
   });
@@ -326,7 +325,8 @@ async function mainFunction() {
 
 let start = mainFunction();
 let runTaskDrawHeatMap = () => {
-  schedule.scheduleJob({ start: startTime, rule: '*/3 * * * *' }, function() {
+  // schedule.scheduleJob({ start: startTime, rule: '*/3 * * * *' }, function() {
+  schedule.scheduleJob({ start: startTime, rule: '10 * * * *' }, function() {
     mainFunction();
     console.log('run')
   });
