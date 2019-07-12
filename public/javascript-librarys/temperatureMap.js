@@ -275,9 +275,11 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       }
 
       break;
+      
     case "tempHLS":
       color = hslToRgb(degToHsl(value).h, degToHsl(value).s, degToHsl(value).l);
       break;
+
     case "humidity":
       if (0 <= value && value < 5) {
         color = [153, 92, 52];
@@ -321,6 +323,7 @@ TemperatureMap.prototype.getColor = function(levels, value) {
         color = [46, 64, 101];
       }
       break;
+
     case "AQI":
       if (value > 0) {
         // value = parseInt(value/2);
@@ -440,7 +443,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
     inv = 0.0,
     t = 0.0,
     b = 0.0,
-    pwr = 2,
+    pwr = 5,
     ptr;
 
   if (TemperatureMap.pointInPolygon(point, this.polygon)) {
@@ -459,7 +462,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
     });
 
     // noi suy diem
-    for (counter = 0; counter < 10; counter = counter + 1) {
+    for (counter = 0; counter < arr.length; counter = counter + 1) {
       ptr = arr[counter];
       inv = 1 / Math.pow(ptr[0], pwr); // 1/ (khoảng cách ^2)
       t = t + inv * this.points[ptr[1]].value; // gia tri noi suy cua diem
