@@ -328,9 +328,9 @@ let runTaskDrawHeatMap = () => {
     console.log('run-draw-heatmap');
     mainFunction();
   });
-  schedule.scheduleJob({ start: startTime, rule: '*/60 * * * * *' }, function() {
-    console.log('run-test schedule- 60s')
-  });
+  // schedule.scheduleJob({ start: startTime, rule: '*/60 * * * * *' }, function() {
+  //   console.log('run-test schedule- 60s')
+  // });
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

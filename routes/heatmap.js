@@ -32,6 +32,7 @@ router.get("/", (request, response) => {
 
 router.get("/active", (request, response) => {
   setInterval(function() {
+    console.log('wakeup - server - heroku')
     http.get("http://pam-air.herokuapp.com/");
   }, 300000); // every 5 minutes (300000)
   
