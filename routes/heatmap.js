@@ -31,7 +31,10 @@ router.get("/", (request, response) => {
 });
 
 router.get("/active", (request, response) => {
-  // console.log('start schedule');
+  setInterval(function() {
+    http.get("http://pam-air.herokuapp.com/");
+  }, 300000); // every 5 minutes (300000)
+  
   createHeatMap.runTaskDrawHeatMap();
   response.send('active success');
   response.end();

@@ -220,10 +220,10 @@ function getCurrentTime() {
   return datetime;
 }
 
-function insertDataToTable(heatmapData, heatmapType) {
+function insertDataToTable(heatmapData) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmapType: heatmapType, heatmap: heatmapData, create_at: getCurrentTime() }])
+    .insert([{ heatmap: heatmapData, create_at: getCurrentTime() }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -317,18 +317,19 @@ async function mainFunction() {
         number_X,
         "AQI"
       ); //temperature humidity AQI tempHLS
-      insertDataToTable(heatMapImg, "AQI");
+      insertDataToTable(heatMapImg);
       console.log("heatMap created");
     }
   });
 }
 
-let start = mainFunction();
 let runTaskDrawHeatMap = () => {
-  // schedule.scheduleJob({ start: startTime, rule: '*/3 * * * *' }, function() {
-  schedule.scheduleJob({ start: startTime, rule: '25 * * * *' }, function() {
+  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
+    console.log('run-draw-heatmap');
     mainFunction();
-    console.log('run')
+  });
+  schedule.scheduleJob({ start: startTime, rule: '*/60 * * * * *' }, function() {
+    console.log('run-test schedule- 60s')
   });
 };
 
