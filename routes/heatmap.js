@@ -4,6 +4,7 @@ var rethinkdb = require("../schema/connect-rethinkdb");
 const CircularJSON = require("circular-json");
 
 var createHeatMap = require("../schema/schedule-create-heatmap"); // create connect to rethinkDB
+var http = require('http');
 
 router.get("/", (request, response) => {
   r.table("heatmaps").run(rethinkdb.connection, (err, res) => {
