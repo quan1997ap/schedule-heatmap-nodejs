@@ -9,7 +9,9 @@ var cors = require('cors');
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
 var connectRethinkDB = require('./schema/connect-rethinkdb');
-
+var http = require('http');
+var createHeatMap = require("./schema/schedule-create-heatmap");
+createHeatMap.runTaskDrawHeatMap();
 var app = express();
 
 // view engine setup

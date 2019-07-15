@@ -7,7 +7,6 @@ var createHeatMap = require("../schema/schedule-create-heatmap"); // create conn
 var http = require('http');
 
 router.get("/", (request, response) => {
-  // r.table("heatmaps")
   r.table('heatmaps')
   .run(rethinkdb.connection, (err, res) => {
     if (err) {
@@ -33,16 +32,17 @@ router.get("/", (request, response) => {
   });
 });
 
-router.get("/active", (request, response) => {
-  setInterval(function() {
-    console.log('wakeup - server - heroku');
-    http.get("http://pam-air.herokuapp.com/");
-  }, 300000); // every 5 minutes (300000)
+
+// router.get("/active", (request, response) => {
+//   setInterval(function() {
+//     console.log('wakeup - server - heroku');
+//     http.get("http://pam-air.herokuapp.com/");
+//   }, 300000); // every 5 minutes (300000)
   
-  createHeatMap.runTaskDrawHeatMap();
-  response.send('active success');
-  response.end();
-});
+//   createHeatMap.runTaskDrawHeatMap();
+//   response.send('active success');
+//   response.end();
+// });
 
 router.get("/:id", (request, response) => {
   response.json({
