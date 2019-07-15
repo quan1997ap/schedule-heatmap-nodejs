@@ -3,7 +3,6 @@ var TemperatureMap = require("../public/javascript-librarys/temperatureMap");
 const { createCanvas, loadImage } = require("canvas");
 var axios = require("axios");
 const fs = require("fs"); // di tu thu muc goc cua ung  dung
-let provinceData, enviObjectData;
 
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);

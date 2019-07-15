@@ -117,7 +117,7 @@ function getCurrentWeatherData() {
                     stationData.aqi_us_1h = subdistrictData.aqi_us_1h;
                     // get ( 0: Humidity ) ; ( 1: PM2.5 ) ; ( 2: Temp )
 
-                    let valueHumidity =
+                    let humidityValue =
                       subdistrictData.children[0] &&
                       subdistrictData.children[0].lastvalue &&
                       subdistrictData.children[0].lastvalue[0] &&
@@ -126,7 +126,7 @@ function getCurrentWeatherData() {
                             subdistrictData.children[0].lastvalue[0].value
                           )
                         : -999999;
-                    let valuePM2 =
+                    let pm2Value =
                       subdistrictData.children[1] &&
                       subdistrictData.children[1].lastvalue &&
                       subdistrictData.children[1].lastvalue[0] &&
@@ -135,7 +135,7 @@ function getCurrentWeatherData() {
                             subdistrictData.children[1].lastvalue[0].value
                           )
                         : -999999;
-                    let valueTemp =
+                    let tempValue =
                       subdistrictData.children[2] &&
                       subdistrictData.children[2].lastvalue &&
                       subdistrictData.children[2].lastvalue[0] &&
@@ -144,12 +144,15 @@ function getCurrentWeatherData() {
                             subdistrictData.children[2].lastvalue[0].value
                           )
                         : -999999;
-                    let AQI = subdistrictData.aqi_us_1h
+                    let aqiValue = subdistrictData.aqi_us_1h
                       ? subdistrictData.aqi_us_1h
                       : -999999;
 
                     // stationData.value = valueTemp;
-                    stationData.value = AQI;
+                    stationData.aqiValue = aqiValue;
+                    stationData.tempValue = tempValue;
+                    stationData.pm2Value = pm2Value;
+                    stationData.humidityValue = humidityValue;
 
                     stationData.aqi_us_1h_longtime =
                       subdistrictData.aqi_us_1h_longtime;
@@ -281,6 +284,8 @@ async function mainFunction() {
       }
 
       // mảng các điểm đã biết
+      // aqiValue; tempValue; pm2Value; humidityValue;
+
       let knownPoints = [];
 
       let knowPointLength = currentWeatherData[1].length; // tất cả các điểm ở việt nam
@@ -299,6 +304,7 @@ async function mainFunction() {
         }
       }
 
+      //  tất cả các điểm ở trong thành phố hà nội - việt nam
       // for (let k = 0; k < weatherData.stationList.length; k++) {
       //   knownPoints.push({
       //     y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
@@ -316,17 +322,19 @@ async function mainFunction() {
         number_X,
         "AQI"
       ); //temperature humidity AQI tempHLS
-      insertDataToTable(heatMapImg);
+      // insertDataToTable(heatMapImg);
+      writeFile("./public/json/heatmap.txt", heatMapImg);
       console.log("heatMap created");
     }
   });
 }
 
 let runTaskDrawHeatMap = () => {
-  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
-    console.log('run-draw-heatmap');
-    mainFunction();
-  });
+  // schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
+  //   console.log('run-draw-heatmap');
+  //   mainFunction();
+  // });
+  mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
