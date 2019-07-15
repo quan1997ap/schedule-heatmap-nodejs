@@ -334,7 +334,7 @@ let runTaskDrawHeatMap = () => {
     console.log('run-draw-heatmap');
     mainFunction();
   });
-  mainFunction();
+  // mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
