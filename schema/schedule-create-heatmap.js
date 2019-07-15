@@ -114,6 +114,7 @@ function getCurrentWeatherData() {
                   // du lieu cua cac huyện
                   districtData.children.forEach(subdistrictData => {
                     let stationData = Object.create({});
+
                     stationData.aqi_us_1h = subdistrictData.aqi_us_1h;
                     // get ( 0: Humidity ) ; ( 1: PM2.5 ) ; ( 2: Temp )
 
@@ -125,7 +126,7 @@ function getCurrentWeatherData() {
                         ? parseFloat(
                             subdistrictData.children[0].lastvalue[0].value
                           )
-                        : -999999;
+                        : -99999;
                     let pm2Value =
                       subdistrictData.children[1] &&
                       subdistrictData.children[1].lastvalue &&
@@ -134,7 +135,7 @@ function getCurrentWeatherData() {
                         ? parseFloat(
                             subdistrictData.children[1].lastvalue[0].value
                           )
-                        : -999999;
+                        : -99999;
                     let tempValue =
                       subdistrictData.children[2] &&
                       subdistrictData.children[2].lastvalue &&
@@ -143,12 +144,11 @@ function getCurrentWeatherData() {
                         ? parseFloat(
                             subdistrictData.children[2].lastvalue[0].value
                           )
-                        : -999999;
+                        : -99999;
                     let aqiValue = subdistrictData.aqi_us_1h
                       ? subdistrictData.aqi_us_1h
-                      : -999999;
+                      : -99999;
 
-                    // stationData.value = valueTemp;
                     stationData.aqiValue = aqiValue;
                     stationData.tempValue = tempValue;
                     stationData.pm2Value = pm2Value;
@@ -163,8 +163,15 @@ function getCurrentWeatherData() {
                     stationData.localId = subdistrictData.lng;
                     stationData.siteId = subdistrictData.siteId;
                     stationData.subdistrictName = subdistrictData.name;
-                    if (stationData.value != -999999) {
-                      // chỉ lấy các điểm có dữ liệu
+
+                    // chỉ lấy các điểm có dữ liệu
+                    if (stationData.aqiValue != -99999  && 
+                        stationData.tempValue != -99999  && 
+                        stationData.pm2Value != -99999  && 
+                        stationData.humidityValue != -99999 
+                        // || true nếu chỉ muốn xem các điểm đã biết
+
+                    ) {
                       stationDataOfProvince.stationList.push(stationData);
                       allStationData.push(stationData);
                     }
@@ -222,10 +229,10 @@ function getCurrentTime() {
   return datetime;
 }
 
-function insertDataToTable(heatmapData) {
+function insertDataToTable(heatmapData, heatmapType) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmap: heatmapData, create_at: getCurrentTime(), date: Date.now() }])
+    .insert([{ heatmap: heatmapData, type : heatmapType ,create_at: getCurrentTime(), date: Date.now() }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -299,7 +306,7 @@ async function mainFunction() {
           knownPoints.push({
             y: parseInt((currentWeatherData[1][i].lat - minLat) / degX),
             x: parseInt((currentWeatherData[1][i].lng - minLng) / degY),
-            value: currentWeatherData[1][i].value
+            value: currentWeatherData[1][i].aqiValue
           });
         }
       }
@@ -313,18 +320,38 @@ async function mainFunction() {
       //   });
       // }
 
-      var pointAffectNumber = knownPoints.length;
-      let heatMapImg = createHeatMapBase64(
-        pointAffectNumber,
-        knownPoints,
-        boundaryOfHeatMapCanvas,
-        number_Y,
-        number_X,
-        "AQI"
-      ); //temperature humidity AQI tempHLS
-      // insertDataToTable(heatMapImg);
-      writeFile("./public/json/heatmap.txt", heatMapImg);
-      console.log("heatMap created");
+      let heatmapTypes = ['tempHLS', 'AQI', 'humidity' ];
+      let typeIndex = 0;
+      while (typeIndex <= heatmapTypes.length){
+        var pointAffectNumber = knownPoints.length;
+        let heatMapImg = createHeatMapBase64(
+          pointAffectNumber,
+          knownPoints,
+          boundaryOfHeatMapCanvas,
+          number_Y,
+          number_X,
+          heatmapTypes[typeIndex]
+        ); //temperature humidity AQI tempHLS
+        insertDataToTable(heatMapImg, heatmapTypes[typeIndex]);
+        writeFile("./public/json/heatmap.txt", heatMapImg);
+        console.log("heatMap created");
+        typeIndex++;
+      }
+
+      // heatmapTypes.forEach( type => {
+      //   var pointAffectNumber = knownPoints.length;
+      //   let heatMapImg = createHeatMapBase64(
+      //     pointAffectNumber,
+      //     knownPoints,
+      //     boundaryOfHeatMapCanvas,
+      //     number_Y,
+      //     number_X,
+      //     type
+      //   ); //temperature humidity AQI tempHLS
+      //   insertDataToTable(heatMapImg);
+      //   writeFile("./public/json/heatmap.txt", heatMapImg);
+      //   console.log("heatMap created");
+      // })
     }
   });
 }

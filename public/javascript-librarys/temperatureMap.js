@@ -443,7 +443,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
     inv = 0.0,
     t = 0.0,
     b = 0.0,
-    pwr = 5,
+    pwr = 2,
     ptr;
 
   if (TemperatureMap.pointInPolygon(point, this.polygon)) {

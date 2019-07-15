@@ -8,7 +8,11 @@ var cors = require('cors');
 // import router
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
-
+var connectRethinkDB = require('./schema/connect-rethinkdb');
+var http = require('http');
+// run schedule
+var createHeatMap = require("./schema/schedule-create-heatmap");
+createHeatMap.runTaskDrawHeatMap();
 
 var app = express();
 
@@ -44,6 +48,12 @@ app.use(function(err, req, res, next) {
 });
 
 
-const port = 5000;
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+var port = process.env.PORT || 8080
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+setInterval(function() {
+  console.log('wakeup - server - heroku');
+  http.get("http://pam-air.herokuapp.com/");
+}, 300000); // every 5 minutes (300000)
+
 module.exports = app;
