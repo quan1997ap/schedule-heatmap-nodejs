@@ -66,7 +66,6 @@ function degToHsl(deg) {
   let h;
   let s = 100;
   let l = 50;
-  let a = 100;
   if (deg <= 40) {
     h = parseInt(270 - 6.75 * deg); // degMax = 40*C => Hmax = 270 => 1 *c = 6.75 khoang (270/ 45)
     return { h, s, l };
@@ -76,8 +75,8 @@ function degToHsl(deg) {
     let s = 100;
     let l = 50;
     return { h, s, l };
-  } else {
-    return { h, s, l };
+  } else if (deg >= 50 ) {
+    return { h : 300, s : 100, l: 30 };
   }
 }
 
@@ -320,6 +319,8 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       } else if (90 <= value && value < 95) {
         color = [59, 75, 116];
       } else if (95 <= value && value <= 100) {
+        color = [46, 64, 101];
+      } else if (value > 100) {
         color = [46, 64, 101];
       }
       break;
