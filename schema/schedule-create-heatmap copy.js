@@ -223,7 +223,9 @@ function getCurrentTime() {
 function insertDataToTable(heatmapData) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmap: heatmapData, create_at: getCurrentTime() }])
+    .insert([
+      { heatmap: heatmapData, create_at: getCurrentTime(), date: Date.now() }
+    ])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -237,9 +239,7 @@ function insertDataToTable(heatmapData) {
 
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
-  const degY = 0.00903758 / 10;
-  ; // degX <=> 100m 1 ô
-
+  const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
   let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
   let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
   let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại;
@@ -300,14 +300,6 @@ async function mainFunction() {
           });
         }
       }
-
-      // for (let k = 0; k < weatherData.stationList.length; k++) {
-      //   knownPoints.push({
-      //     y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
-      //     x: parseInt((weatherData.stationList[k].lng - minLng) / degY),
-      //     value: weatherData.stationList[k].value
-      //   });
-      // }
 
       var pointAffectNumber = knownPoints.length;
       let heatMapImg = createHeatMapBase64(
