@@ -7,7 +7,7 @@ const fs = require("fs"); // di tu thu muc goc cua ung  dung
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);
 var schedule = require("node-schedule");
-// var rethinkdb = require("../schema/connect-rethinkdb");
+var rethinkdb = require("../schema/connect-rethinkdb");
 
 // https://www.npmjs.com/package/node-schedule
 // thoi gian bat dau, ket thuc , sau 1s chay lai (chú ý dấu *)
@@ -326,9 +326,6 @@ let runTaskDrawHeatMap = () => {
   schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
     console.log('run-draw-heatmap');
     mainFunction();
-  });
-  schedule.scheduleJob({ start: startTime, rule: '*/10 * * * * *' }, function() {
-    console.log('run-test');
   });
 };
 
