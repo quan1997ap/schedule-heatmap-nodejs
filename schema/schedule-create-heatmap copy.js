@@ -39,14 +39,14 @@ function createHeatMapBase64(
   // drw0.drawFull(true, function () { });
 
   // mức độ chi tiết vừa
-  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
-  drw0.drawFull(false, function() {
-    drw0.drawPoints();
-  });
+  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
+  // drw0.drawFull(false, function() {
+  //   drw0.drawPoints();
+  // });
 
   // mức độ chi tiết thấp
-  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
-  // drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
+  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
+  drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
 
   return canvas.toDataURL();
 }
@@ -221,7 +221,6 @@ function getCurrentTime() {
 }
 
 function insertDataToTable(heatmapData) {
-  r.db("quandev");
   r.table("heatmaps")
     .insert([
       { heatmap: heatmapData, create_at: getCurrentTime(), date: Date.now() }
@@ -236,7 +235,6 @@ function insertDataToTable(heatmapData) {
       }
     });
 }
-
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
   const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
@@ -301,32 +299,24 @@ async function mainFunction() {
         }
       }
 
+
       var pointAffectNumber = knownPoints.length;
-      let heatMapImg = createHeatMapBase64(
-        pointAffectNumber,
-        knownPoints,
-        boundaryOfHeatMapCanvas,
-        number_Y,
-        number_X,
-        "AQI"
-      ); //temperature humidity AQI tempHLS
+      // let heatMapImg = createHeatMapBase64(
+      //   pointAffectNumber,
+      //   knownPoints,
+      //   boundaryOfHeatMapCanvas,
+      //   number_Y,
+      //   number_X,
+      //   "AQI"
+      // ); //temperature humidity AQI tempHLS
       // insertDataToTable(heatMapImg);
 
       console.log("heatMap created");
-      writeFile("./public/json/heatmap.txt", heatMapImg);
-      // writeFile("./public/json/heatmap.txt", JSON.stringify(knownPoints));
+      // writeFile("./public/json/heatmap.txt", heatMapImg);
     }
   });
 }
 
 let start = mainFunction();
-// let runTaskDrawHeatMap = () => {
-//   schedule.scheduleJob({ start: startTime, rule: "*/15 * * * *" }, function() {
-//     mainFunction();
-//     console.log('run')
-//   });
-// };
-
-// module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
 
 module.exports = mainFunction;

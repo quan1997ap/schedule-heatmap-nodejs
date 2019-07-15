@@ -8,7 +8,7 @@ var cors = require('cors');
 // import router
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
-// var createHeatmap = require('./schema/schedule-create-heatmap');
+var connectRethinkDB = require('./schema/connect-rethinkdb');
 
 var app = express();
 
@@ -44,10 +44,10 @@ app.use(function(err, req, res, next) {
 });
 
 
-// var port = process.env.PORT || 8080
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+var port = process.env.PORT || 8080
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-const port = 5000;
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+// const port = 5000;
+// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app;

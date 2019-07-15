@@ -3,12 +3,11 @@ var TemperatureMap = require("../public/javascript-librarys/temperatureMap");
 const { createCanvas, loadImage } = require("canvas");
 var axios = require("axios");
 const fs = require("fs"); // di tu thu muc goc cua ung  dung
-let provinceData, enviObjectData;
 
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);
 var schedule = require("node-schedule");
-var rethinkdb = require("../schema/connect-rethinkdb");
+// var rethinkdb = require("../schema/connect-rethinkdb");
 
 // https://www.npmjs.com/package/node-schedule
 // thoi gian bat dau, ket thuc , sau 1s chay lai (chú ý dấu *)
@@ -39,14 +38,14 @@ function createHeatMapBase64(
   // drw0.drawFull(true, function () { });
 
   // mức độ chi tiết vừa
-  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
-  // drw0.drawFull(false, function() {
-  //   drw0.drawPoints();
-  // });
+  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
+  drw0.drawFull(false, function() {
+    drw0.drawPoints();
+  });
 
   // mức độ chi tiết thấp
-  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
-  drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
+  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
+  // drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
 
   return canvas.toDataURL();
 }
@@ -221,10 +220,9 @@ function getCurrentTime() {
 }
 
 function insertDataToTable(heatmapData) {
+  r.db("quandev");
   r.table("heatmaps")
-    .insert([
-      { heatmap: heatmapData, create_at: getCurrentTime(), date: Date.now() }
-    ])
+    .insert([{ heatmap: heatmapData, create_at: getCurrentTime(), date: Date.now() }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -235,9 +233,11 @@ function insertDataToTable(heatmapData) {
       }
     });
 }
+
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
   const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
+
   let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
   let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
   let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại;
@@ -283,7 +283,7 @@ async function mainFunction() {
       // mảng các điểm đã biết
       let knownPoints = [];
 
-      let knowPointLength = currentWeatherData[1].length;
+      let knowPointLength = currentWeatherData[1].length; // tất cả các điểm ở việt nam
       for (let i = 0; i < knowPointLength; i++) {
         if (
           minLat <= currentWeatherData[1][i].lat &&
@@ -299,24 +299,34 @@ async function mainFunction() {
         }
       }
 
+      // for (let k = 0; k < weatherData.stationList.length; k++) {
+      //   knownPoints.push({
+      //     y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
+      //     x: parseInt((weatherData.stationList[k].lng - minLng) / degY),
+      //     value: weatherData.stationList[k].value
+      //   });
+      // }
 
       var pointAffectNumber = knownPoints.length;
-      // let heatMapImg = createHeatMapBase64(
-      //   pointAffectNumber,
-      //   knownPoints,
-      //   boundaryOfHeatMapCanvas,
-      //   number_Y,
-      //   number_X,
-      //   "AQI"
-      // ); //temperature humidity AQI tempHLS
-      // insertDataToTable(heatMapImg);
-
+      let heatMapImg = createHeatMapBase64(
+        pointAffectNumber,
+        knownPoints,
+        boundaryOfHeatMapCanvas,
+        number_Y,
+        number_X,
+        "AQI"
+      ); //temperature humidity AQI tempHLS
+      insertDataToTable(heatMapImg);
       console.log("heatMap created");
-      // writeFile("./public/json/heatmap.txt", heatMapImg);
     }
   });
 }
 
-let start = mainFunction();
+let runTaskDrawHeatMap = () => {
+  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
+    console.log('run-draw-heatmap');
+    mainFunction();
+  });
+};
 
-module.exports = mainFunction;
+module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
