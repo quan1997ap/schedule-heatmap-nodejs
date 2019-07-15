@@ -223,7 +223,7 @@ function getCurrentTime() {
 function insertDataToTable(heatmapData) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmap: heatmapData, create_at: getCurrentTime() }])
+    .insert([{ heatmap: heatmapData, create_at: getCurrentTime(), date: Time.now }])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -284,7 +284,7 @@ async function mainFunction() {
       // mảng các điểm đã biết
       let knownPoints = [];
 
-      let knowPointLength = currentWeatherData[1].length;
+      let knowPointLength = currentWeatherData[1].length; // tất cả các điểm ở việt nam
       for (let i = 0; i < knowPointLength; i++) {
         if (
           minLat <= currentWeatherData[1][i].lat &&
@@ -328,9 +328,6 @@ let runTaskDrawHeatMap = () => {
     console.log('run-draw-heatmap');
     mainFunction();
   });
-  // schedule.scheduleJob({ start: startTime, rule: '*/60 * * * * *' }, function() {
-  //   console.log('run-test schedule- 60s')
-  // });
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

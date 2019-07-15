@@ -7,7 +7,9 @@ var createHeatMap = require("../schema/schedule-create-heatmap"); // create conn
 var http = require('http');
 
 router.get("/", (request, response) => {
-  r.table("heatmaps").run(rethinkdb.connection, (err, res) => {
+  // r.table("heatmaps")
+  r.table('heatmaps').orderBy({index: 'date'})
+  .run(rethinkdb.connection, (err, res) => {
     if (err) {
       console.log(err);
     } else {
@@ -33,7 +35,7 @@ router.get("/", (request, response) => {
 
 router.get("/active", (request, response) => {
   setInterval(function() {
-    console.log('wakeup - server - heroku')
+    console.log('wakeup - server - heroku');
     http.get("http://pam-air.herokuapp.com/");
   }, 300000); // every 5 minutes (300000)
   
