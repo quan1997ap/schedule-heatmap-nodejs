@@ -9,8 +9,6 @@ var http = require('http');
 router.get("/", (request, response) => {
   // r.table("heatmaps")
   r.table('heatmaps')
-  .indexCreate('date')
-  .orderBy({index: 'date'})
   .run(rethinkdb.connection, (err, res) => {
     if (err) {
       console.log(err);
