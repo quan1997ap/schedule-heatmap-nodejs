@@ -336,7 +336,7 @@ async function mainFunction() {
       let heatmapTypes = ['tempHLS', 'AQI', 'humidity' ];//temperature humidity AQI tempHLS
       let typeIndex = 0;
       while (typeIndex < heatmapTypes.length) {
-        let knownPoints = [];
+        let knownPoints = [], heatMapImg = "";
         switch (heatmapTypes[typeIndex]) {
           case "tempHLS":
             knownPoints = knownTempPoints;
@@ -349,7 +349,7 @@ async function mainFunction() {
             break;
         }
         let pointAffectNumber = knownPoints.length;
-        let heatMapImg = createHeatMapBase64(
+        heatMapImg = createHeatMapBase64(
           pointAffectNumber,
           knownPoints,
           boundaryOfHeatMapCanvas,
