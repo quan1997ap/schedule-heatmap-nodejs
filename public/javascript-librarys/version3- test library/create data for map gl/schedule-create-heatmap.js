@@ -165,12 +165,12 @@ function getCurrentWeatherData() {
                     stationData.subdistrictName = subdistrictData.name;
 
                     // chỉ lấy các điểm có dữ liệu
-                    if (stationData.aqiValue != -99999  && 
-                        stationData.tempValue != -99999  && 
-                        stationData.pm2Value != -99999  && 
-                        stationData.humidityValue != -99999 
-                        // || true nếu chỉ muốn xem các điểm đã biết
-
+                    if (
+                      stationData.aqiValue != -99999 &&
+                      stationData.tempValue != -99999 &&
+                      stationData.pm2Value != -99999 &&
+                      stationData.humidityValue != -99999
+                      // || true nếu chỉ muốn xem các điểm đã biết
                     ) {
                       stationDataOfProvince.stationList.push(stationData);
                       allStationData.push(stationData);
@@ -232,7 +232,14 @@ function getCurrentTime() {
 function insertDataToTable(heatmapData, heatmapType) {
   r.db("quandev");
   r.table("heatmaps")
-    .insert([{ heatmap: heatmapData, type : heatmapType ,create_at: getCurrentTime(), date: Date.now() }])
+    .insert([
+      {
+        heatmap: heatmapData,
+        type: heatmapType,
+        create_at: getCurrentTime(),
+        date: Date.now()
+      }
+    ])
     .run(rethinkdb.connection, (err, res) => {
       if (err) {
         console.log(err);
@@ -293,7 +300,9 @@ async function mainFunction() {
       // mảng các điểm đã biết
       // aqiValue; tempValue; pm2Value; humidityValue;
 
-      let knownPoints = [];
+      let knownAQIPoints = [],
+          knownTempPoints = [],
+          knownHumidityPoints = [];
 
       let knowPointLength = currentWeatherData[1].length; // tất cả các điểm ở việt nam
       for (let i = 0; i < knowPointLength; i++) {
@@ -303,7 +312,21 @@ async function mainFunction() {
           maxLat >= currentWeatherData[1][i].lat &&
           maxLng >= currentWeatherData[1][i].lng
         ) {
-          knownPoints.push({
+          // nhiet do
+          knownTempPoints.push([
+           
+             parseInt((currentWeatherData[1][i].lng - minLng) / degY),
+             parseInt( ((maxLat-minLat) / degX) - ((currentWeatherData[1][i].lat - minLat) / degX) ), 
+             currentWeatherData[1][i].tempValue
+          ]);
+          // do am
+          knownHumidityPoints.push({
+            y: parseInt((currentWeatherData[1][i].lat - minLat) / degX),
+            x: parseInt((currentWeatherData[1][i].lng - minLng) / degY),
+            value: currentWeatherData[1][i].humidityValue
+          });
+          //aqi
+          knownAQIPoints.push({
             y: parseInt((currentWeatherData[1][i].lat - minLat) / degX),
             x: parseInt((currentWeatherData[1][i].lng - minLng) / degY),
             value: currentWeatherData[1][i].aqiValue
@@ -311,47 +334,38 @@ async function mainFunction() {
         }
       }
 
-      //  tất cả các điểm ở trong thành phố hà nội - việt nam
-      // for (let k = 0; k < weatherData.stationList.length; k++) {
-      //   knownPoints.push({
-      //     y: parseInt((weatherData.stationList[k].lat - minLat) / degX),
-      //     x: parseInt((weatherData.stationList[k].lng - minLng) / degY),
-      //     value: weatherData.stationList[k].value
-      //   });
-      // }
-
-      let heatmapTypes = ['tempHLS', 'AQI', 'humidity' ];
+      // let heatmapTypes = ['tempHLS', 'AQI', 'humidity' ];//temperature humidity AQI tempHLS
+      let heatmapTypes = ['tempHLS' ];//temperature humidity AQI tempHLS
       let typeIndex = 0;
-      while (typeIndex <= heatmapTypes.length){
-        var pointAffectNumber = knownPoints.length;
-        let heatMapImg = createHeatMapBase64(
-          pointAffectNumber,
-          knownPoints,
-          boundaryOfHeatMapCanvas,
-          number_Y,
-          number_X,
-          heatmapTypes[typeIndex]
-        ); //temperature humidity AQI tempHLS
-        insertDataToTable(heatMapImg, heatmapTypes[typeIndex]);
-        writeFile("./public/json/heatmap.txt", heatMapImg);
+      while (typeIndex < heatmapTypes.length) {
+        let knownPoints = [], heatMapImg = "";
+        switch (heatmapTypes[typeIndex]) {
+          case "tempHLS":
+            knownPoints = knownTempPoints;
+            break;
+          case "humidity":
+            knownPoints = knownHumidityPoints;
+            break;
+          case "AQI":
+            knownPoints = knownAQIPoints;
+            break;
+        }
+        let pointAffectNumber = knownPoints.length;
+        // heatMapImg = createHeatMapBase64(
+        //   pointAffectNumber,
+        //   knownPoints,
+        //   boundaryOfHeatMapCanvas,
+        //   number_Y,
+        //   number_X,
+        //   heatmapTypes[typeIndex]
+        // );
+
+        // insertDataToTable(heatMapImg, heatmapTypes[typeIndex]);
+        //writeFile("./public/json/heatmap.txt", heatMapImg);
+        writeFile("./public/json/heatmap.txt", JSON.stringify(knownTempPoints));
         console.log("heatMap created");
         typeIndex++;
       }
-
-      // heatmapTypes.forEach( type => {
-      //   var pointAffectNumber = knownPoints.length;
-      //   let heatMapImg = createHeatMapBase64(
-      //     pointAffectNumber,
-      //     knownPoints,
-      //     boundaryOfHeatMapCanvas,
-      //     number_Y,
-      //     number_X,
-      //     type
-      //   ); //temperature humidity AQI tempHLS
-      //   insertDataToTable(heatMapImg);
-      //   writeFile("./public/json/heatmap.txt", heatMapImg);
-      //   console.log("heatMap created");
-      // })
     }
   });
 }
@@ -361,7 +375,7 @@ let runTaskDrawHeatMap = () => {
   //   console.log('run-draw-heatmap');
   //   mainFunction();
   // });
-  mainFunction();
+   mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

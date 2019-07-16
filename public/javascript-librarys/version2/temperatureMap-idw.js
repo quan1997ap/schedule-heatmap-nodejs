@@ -66,7 +66,6 @@ function degToHsl(deg) {
   let h;
   let s = 100;
   let l = 50;
-  let a = 100;
   if (deg <= 40) {
     h = parseInt(270 - 6.75 * deg); // degMax = 40*C => Hmax = 270 => 1 *c = 6.75 khoang (270/ 45)
     return { h, s, l };
@@ -76,8 +75,8 @@ function degToHsl(deg) {
     let s = 100;
     let l = 50;
     return { h, s, l };
-  } else {
-    return { h, s, l };
+  } else if (deg >= 50 ) {
+    return { h : 300, s : 100, l: 30 };
   }
 }
 
@@ -140,7 +139,7 @@ function hexToRGB(h) {
     g = "0x" + h[3] + h[4];
     b = "0x" + h[5] + h[6];
   }
-  // console.log(hexToRGB("#580122"));
+
   return [+r, +g, +b];
 }
 
@@ -275,9 +274,11 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       }
 
       break;
+      
     case "tempHLS":
       color = hslToRgb(degToHsl(value).h, degToHsl(value).s, degToHsl(value).l);
       break;
+
     case "humidity":
       if (0 <= value && value < 5) {
         color = [153, 92, 52];
@@ -319,8 +320,11 @@ TemperatureMap.prototype.getColor = function(levels, value) {
         color = [59, 75, 116];
       } else if (95 <= value && value <= 100) {
         color = [46, 64, 101];
+      } else if (value > 100) {
+        color = [46, 64, 101];
       }
       break;
+
     case "AQI":
       if (value > 0) {
         // value = parseInt(value/2);
@@ -440,7 +444,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
     inv = 0.0,
     t = 0.0,
     b = 0.0,
-    pwr = 5,
+    pwr = 2,
     ptr;
 
   if (TemperatureMap.pointInPolygon(point, this.polygon)) {
@@ -454,82 +458,9 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       arr[counter] = [dis, counter]; // khoang cach vs stt
     }
 
-    // let pointWithDistance = [ [], [], [], [], [], [], [] , [], [], [], [], [],[] ];
-    // for(let i = 0; i < arr.length; i++ ){
-    //   if (arr[i][0] < 10000){
-    //     pointWithDistance[0].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 25000){
-    //     pointWithDistance[1].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 50000){
-    //     pointWithDistance[2].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 100000){
-    //     pointWithDistance[3].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 150000){
-    //     pointWithDistance[4].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 200000){
-    //     pointWithDistance[5].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 250000){
-    //     pointWithDistance[6].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 300000){
-    //     pointWithDistance[7].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 350000){
-    //     pointWithDistance[8].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 400000){
-    //     pointWithDistance[9].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 450000){
-    //     pointWithDistance[10].push(arr[i])
-    //   }
-    //   if (arr[i][0] < 500000){
-    //     pointWithDistance[10].push(arr[i])
-    //   }
-    //   else{
-    //     pointWithDistance[11].push(arr[i])
-    //   }
-    // }
-
-    // for( let i = 0 ; i < pointWithDistance.length; i ++ ){
-    //   if (pointWithDistance[i].length > 5 && i < 2 ){
-    //     arr = pointWithDistance[i];
-    //     break;
-    //   }
-    //   if (pointWithDistance[i].length > 10 && i < 6 ){
-    //     arr = pointWithDistance[i];
-    //     break;
-    //   }
-    //   if (pointWithDistance[i].length > 15 && i < 9 ){
-    //     arr = pointWithDistance[i];
-    //     break;
-    //   }
-    //   if (pointWithDistance[i].length > 20 && i < 12 ){
-    //     arr = pointWithDistance[i];
-    //     break;
-    //   }
-    // }
-
-    // gioi han deim
-    // let checkArr = [], indexCount = 0;
-    // for (let q = 0; q < arr.length ; q ++){
-    //     checkArr.push([arr[q][0], indexCount]) ; //[gia tri khoang cach, index]
-    //     indexCount ++;
-    // }
-
-    // if (checkArr.length > 5){
-    //   arr = checkArr;
-    // }
-
-    // arr.sort(function(a, b) {
-    //   return a[0] - b[0];
-    // });
+    arr.sort(function(a, b) {
+      return a[0] - b[0];
+    });
 
     // noi suy diem
     for (counter = 0; counter < arr.length; counter = counter + 1) {
