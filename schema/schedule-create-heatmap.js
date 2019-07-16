@@ -335,7 +335,7 @@ async function mainFunction() {
 
       let heatmapTypes = ['tempHLS', 'AQI', 'humidity' ];//temperature humidity AQI tempHLS
       let typeIndex = 0;
-      while (typeIndex <= heatmapTypes.length) {
+      while (typeIndex < heatmapTypes.length) {
         let knownPoints = [], heatMapImg = "";
         switch (heatmapTypes[typeIndex]) {
           case "tempHLS":
@@ -371,7 +371,7 @@ let runTaskDrawHeatMap = () => {
     console.log('run-draw-heatmap');
     mainFunction();
   });
-  // mainFunction();
+  //  mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
