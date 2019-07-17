@@ -579,8 +579,8 @@ TemperatureMap.prototype.drawLow = function(limit, res, clean, callback) {
         str = "rgba(" + col[0] + ", " + col[1] + ", " + col[2] + ", ";
         // tạo gradient
         gradient = ctx.createRadialGradient(x, y, 0, x, y, res);
-        gradient.addColorStop(0, str + "0.7)");
-        gradient.addColorStop(1, str + "0.1)");
+        gradient.addColorStop(0, str + "1)");
+        gradient.addColorStop(1, str + "1)");
         ctx.fillStyle = "#fcfcfc"; //<=== must be filled white for properly render
         ctx.fillStyle = gradient;
         ctx.fillRect(x - res, y - res, dbl, dbl);
