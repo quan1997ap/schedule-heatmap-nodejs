@@ -455,18 +455,20 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         // khi vẽ, nếu điểm nội suy trung với điểm có sẵn thì không nội suy nữa mà lấy luôn giá trị
         return this.points[counter].value;
       }
-      arr[counter] = [dis, counter]; // khoang cach vs stt
+      // arr[counter] = [dis, counter]; // khoang cach vs stt
+      arr[counter] = [dis, this.points[counter].value];
     }
 
-    arr.sort(function(a, b) {
-      return a[0] - b[0];
-    });
+    // arr.sort(function(a, b) {
+    //   return a[0] - b[0];
+    // });
 
     // noi suy diem
     for (counter = 0; counter < arr.length; counter = counter + 1) {
       ptr = arr[counter];
       inv = 1 / Math.pow(ptr[0], pwr); // 1/ (khoảng cách ^2)
-      t = t + inv * this.points[ptr[1]].value; // gia tri noi suy cua diem
+      // t = t + inv * this.points[ptr[1]].value; // gia tri noi suy cua diem
+      t = t + inv * ptr[1];
       b = b + inv;
     }
     return b !== 0 ? t / b : -256;

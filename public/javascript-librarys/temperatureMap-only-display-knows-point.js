@@ -75,11 +75,11 @@ function degToHsl(deg) {
     let s = 100;
     let l = 50;
     return { h, s, l };
-  } else if (deg >= 50 ) {
-    return { h : 300, s : 100, l: 30 };
-  } else{
+  } else if (deg >= 50) {
+    return { h: 300, s: 100, l: 30 };
+  } else {
     // nếu point value  = -255 thì trả #000080
-    return{ h : 240, s : 100, l: 25 };
+    return { h: 240, s: 100, l: 25 };
   }
 }
 
@@ -277,7 +277,7 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       }
 
       break;
-      
+
     case "tempHLS":
       color = hslToRgb(degToHsl(value).h, degToHsl(value).s, degToHsl(value).l);
       break;
@@ -468,7 +468,8 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         // khi vẽ, nếu điểm nội suy trung với điểm có sẵn thì không nội suy nữa mà lấy luôn giá trị
         return this.points[counter].value - 4;
       }
-    }"use strict";
+    }
+    ("use strict");
     // chú thích
     // Hàm get giá trị của điểm nội suy
     // => -255 : các điểm nằm bên ngoài đường bao
@@ -489,11 +490,11 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       };
       this.size = { height: ctx.canvas.height, width: ctx.canvas.width };
     };
-    
+
     TemperatureMap.crossProduct = function(o, a, b) {
       return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
     };
-    
+
     TemperatureMap.pointInPolygon = function(point, vs) {
       var x = point.x,
         y = point.y,
@@ -505,14 +506,14 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         yi = 0,
         yj = 0,
         intersect = false;
-    
+
       j = vs.length - 1;
       for (i = 0; i < vs.length; i = i + 1) {
         xi = vs[i].x;
         yi = vs[i].y;
         xj = vs[j].x;
         yj = vs[j].y;
-    
+
         intersect =
           yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
         if (intersect) {
@@ -522,14 +523,14 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       }
       return inside;
     };
-    
+
     TemperatureMap.squareDistance = function(p0, p1) {
       var x = p0.x - p1.x,
         y = p0.y - p1.y;
-    
+
       return x * x + y * y;
     };
-    
+
     // https://css-tricks.com/converting-color-spaces-in-javascript/
     // chuyển color
     function degToHsl(deg) {
@@ -545,18 +546,18 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         let s = 100;
         let l = 50;
         return { h, s, l };
-      } else if (deg >= 50 ) {
-        return { h : 300, s : 100, l: 30 };
-      } else{
+      } else if (deg >= 50) {
+        return { h: 300, s: 100, l: 30 };
+      } else {
         // nếu point value  = -255 thì trả #000080
-        return{ h : 240, s : 100, l: 25 };
+        return { h: 240, s: 100, l: 25 };
       }
     }
-    
+
     function hslToRgb(h, s, l) {
       s = s / 100;
       l = l / 100;
-    
+
       let c = (1 - Math.abs(2 * l - 1)) * s,
         x = c * (1 - Math.abs(((h / 60) % 2) - 1)),
         m = l - c / 2,
@@ -591,31 +592,31 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       r = Math.round((r + m) * 255);
       g = Math.round((g + m) * 255);
       b = Math.round((b + m) * 255);
-    
+
       return [r, g, b];
     }
-    
+
     function hexToRGB(h) {
       let r = 0,
         g = 0,
         b = 0;
-    
+
       // 3 digits
       if (h.length == 4) {
         r = "0x" + h[1] + h[1];
         g = "0x" + h[2] + h[2];
         b = "0x" + h[3] + h[3];
-    
+
         // 6 digits
       } else if (h.length == 7) {
         r = "0x" + h[1] + h[2];
         g = "0x" + h[3] + h[4];
         b = "0x" + h[5] + h[6];
       }
-    
+
       return [+r, +g, +b];
     }
-    
+
     TemperatureMap.prototype.getColor = function(levels, value) {
       let color;
       switch (this.heatmapType) {
@@ -745,13 +746,17 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
           } else {
             color = [0, 0, 0];
           }
-    
+
           break;
-          
+
         case "tempHLS":
-          color = hslToRgb(degToHsl(value).h, degToHsl(value).s, degToHsl(value).l);
+          color = hslToRgb(
+            degToHsl(value).h,
+            degToHsl(value).s,
+            degToHsl(value).l
+          );
           break;
-    
+
         case "humidity":
           if (0 <= value && value < 5) {
             color = [153, 92, 52];
@@ -797,12 +802,12 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
             color = [46, 64, 101];
           }
           break;
-    
+
         case "AQI":
           if (value > 0) {
             // value = parseInt(value/2);
             // color =  hslToRgb(degToHsl(value).h , degToHsl(value).s , degToHsl(value).l);
-    
+
             // [27, 155, 87]
             // [27, 175, 87]
             // [27, 190, 87]
@@ -833,7 +838,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
             // [125, 1, 34]
             // [112, 1, 34]
             // [88, 1, 34]
-    
+
             if (0 <= value && value <= 10) {
               color = [27, 155, 87];
             } else if (10 < value && value <= 20) {
@@ -855,7 +860,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
             } else if (90 < value && value <= 100) {
               color = [255, 181, 0];
             }
-    
+
             if (100 <= value && value <= 110) {
               color = [255, 166, 0];
             } else if (110 < value && value <= 120) {
@@ -877,7 +882,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
             } else if (190 < value && value <= 200) {
               color = [171, 40, 40];
             }
-    
+
             if (210 <= value && value <= 210) {
               color = [143, 63, 190];
             } else if (210 < value && value <= 220) {
@@ -908,9 +913,9 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       }
       return color;
     };
-    
+
     // CHỈ HIỆN CÁC ĐIỂM BIET GIA TRI
-    
+
     TemperatureMap.prototype.getPointValue = function(limit, point) {
       var counter = 0,
         arr = [],
@@ -921,7 +926,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         b = 0.0,
         pwr = 2,
         ptr;
-    
+
       if (TemperatureMap.pointInPolygon(point, this.polygon)) {
         for (counter = 0; counter < this.points.length; counter = counter + 1) {
           dis = TemperatureMap.squareDistance(point, this.points[counter]);
@@ -939,14 +944,14 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
             return this.points[counter].value - 4;
           }
         }
-        return -255; 
-        // -256 các điểm k giá trị màu xanh ( else trong convert color HLS) 
+        return -255;
+        // -256 các điểm k giá trị màu xanh ( else trong convert color HLS)
         // -255 không hien thi các điểm k giá trị
       } else {
         return -255;
       }
     };
-    
+
     TemperatureMap.prototype.setConvexhullPolygon = function(
       points,
       boundaryPoints,
@@ -960,30 +965,30 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       // nếu chỉ đưa và các phần tử đã biết giá trị(knowPoints) ( chú ý rằng từ các điểm này không xác định được được yMin / yMax / xMin/ xMax  )
       // mà yMin / yMax / xMin/ xMax nằm trong các điểm của mảng boundaryPoints
       // => phải tìm trong tất cả các điểm ( hoặc chỉ trong mảng boundaryPoints)
-    
+
       var i = 0;
       var boundaryPointsUseGetLimit = Object.assign([], boundaryPoints);
       var lengthBoundary = boundaryPointsUseGetLimit.length - 1;
-    
+
       // set poligon
       // Sort by 'y' to get yMin/yMax
       boundaryPointsUseGetLimit.sort(function(a, b) {
         return a.y === b.y ? a.x - b.x : a.y - b.y;
       });
-    
+
       this.limits.yMin = boundaryPointsUseGetLimit[0].y;
       this.limits.yMax = boundaryPointsUseGetLimit[lengthBoundary - 1].y;
-    
+
       // Sort by 'x' to get convex hull polygon and xMin/xMax
       boundaryPointsUseGetLimit.sort(function(a, b) {
         return a.x === b.x ? a.y - b.y : a.x - b.x;
       });
-    
+
       this.limits.xMin = boundaryPointsUseGetLimit[0].x;
       this.limits.xMax = boundaryPointsUseGetLimit[lengthBoundary - 1].x;
-    
+
       // console.log(this.limits, this.points.length, boundaryPoints.length)
-    
+
       var boundaryPointsRevertOy = [];
       var boundaryPointslength = boundaryPoints.length;
       for (var i1 = 0; i1 < boundaryPointslength; i1++) {
@@ -992,11 +997,11 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
           y: height - boundaryPoints[i1].y
         });
       }
-    
+
       this.polygon = boundaryPointsRevertOy;
       //   this.polygon = boundaryPoints;
     };
-    
+
     TemperatureMap.prototype.setDataPoints = function(
       knowPointArr,
       boundaryArr,
@@ -1006,10 +1011,10 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       // set chieu dai rong cua canvas
       this.width = width;
       this.height = height;
-    
+
       var knowPointsRevertOy = [];
       var knowPointslength = knowPointArr.length;
-    
+
       for (var c1 = 0; c1 < knowPointslength; c1++) {
         knowPointsRevertOy.push({
           x: knowPointArr[c1].x,
@@ -1017,11 +1022,11 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
           value: knowPointArr[c1].value
         });
       }
-    
+
       this.points = knowPointsRevertOy;
       this.setConvexhullPolygon(this.points, boundaryArr, width, height);
     };
-    
+
     TemperatureMap.prototype.drawLow = function(limit, res, clean, callback) {
       var self = this,
         ctx = this.ctx,
@@ -1040,7 +1045,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         gradient;
       ctx.clearRect(0, 0, this.size.width, this.size.height);
       ctx.width += 0; //<=== Resizing the canvas will cause the canvas to get cleared.
-    
+
       // Draw aproximation
       for (x = xBeg; x < xEnd; x = x + res) {
         for (y = yBeg; y < yEnd; y = y + res) {
@@ -1074,7 +1079,7 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
           }
         }
       }
-    
+
       // Erase polygon outsides xóa các điểm nằm ngoài
       if (clean && self.polygon.length > 1) {
         ctx.globalCompositeOperation = "destination-in";
@@ -1089,12 +1094,12 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
         ctx.fill();
         ctx.globalCompositeOperation = "source-over";
       }
-    
+
       if (typeof callback === "function") {
         callback();
       }
     };
-    
+
     // vẽ với mật độ chi tiết nhất
     TemperatureMap.prototype.drawFull = function(levels, callback) {
       "use strict";
@@ -1137,26 +1142,26 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
               wy = w * y;
             }
           }
-    
+
           tDif = new Date().getTime() - tBeg;
           if (tDif === 0) {
             tDif = 1;
           }
           // bucleSteps = ((16 * bucleSteps) / tDif) * 0.5;
           bucleSteps = (bucleSteps << 3) / tDif;
-    
+
           ctx.putImageData(img, 0, 0);
-    
+
           if (y < yEnd) {
             recursive();
           } else if (typeof callback === "function") {
             callback();
           }
         };
-    
+
       recursive();
     };
-    
+
     // vẽ heat map ở mức độ vừa
     TemperatureMap.prototype.drawPoints = function(callback) {
       var self = this,
@@ -1165,38 +1170,38 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       var col = [],
         idx = 0,
         pnt;
-    
+
       // for (idx = 0; idx < self.points.length; idx = idx + 1) {
       //   pnt = self.points[idx];
-    
+
       //   col = self.getColor(false, pnt.value);
-    
+
       //   ctx.fillStyle = "rgba(255, 255, 255, 128)";
       //   ctx.beginPath();
       //   ctx.arc(pnt.x, pnt.y, 8, 0, PI2, false);
       //   ctx.fill();
-    
+
       //   ctx.lineWidth = 1;
       //   ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
       //   ctx.beginPath();
       //   ctx.arc(pnt.x, pnt.y, 8, 0, PI2, false);
       //   ctx.stroke();
-    
+
       //   ctx.textAlign = "center";
       //   ctx.textBaseline = "middle";
       //   ctx.fillStyle = "rgb(0, 0, 0)";
       //   ctx.fillText(pnt.value, pnt.x, pnt.y);
       // }
-    
+
       if (typeof callback === "function") {
         callback();
       }
     };
-    
+
     // Phải export // fix err TypeError: TemperatureMap is not a constructor
-    
+
     module.exports = TemperatureMap;
-    
+
     return -255;
   } else {
     return -255;

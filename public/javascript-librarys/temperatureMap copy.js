@@ -5,8 +5,7 @@
 // => -256 : các điểm nằm bên trong đường bao nhưng không có giá trị(nằm cách xa các điểm đã biết => chú ý tham số limitAffect)
 // => -255 : các điểm nằm bên ngoài đường bao
 // => thay đổi tham số limitAffect 100000 <=> 10000
-var TemperatureMap = function(ctx, heatmapType, zoom) {
-  this.zoom = zoom;
+var TemperatureMap = function(ctx, heatmapType) {
   this.ctx = ctx;
   this.points = [];
   this.polygon = [];
@@ -148,31 +147,6 @@ TemperatureMap.prototype.getColor = function(levels, value) {
   let color;
   switch (this.heatmapType) {
     case "temperature":
-      let orangeColor = [
-          [245, 157, 34],
-          [244, 151, 35],
-          [243, 146, 34],
-          [242, 141, 34],
-          [240, 133, 33],
-          [239, 127, 33],
-          [238, 121, 32],
-          [236, 115, 32],
-          [234, 108, 31],
-          [234, 104, 31]
-        ],
-        redColor = [
-          [232, 98, 30],
-          [231, 90, 29],
-          [229, 80, 27],
-          [227, 72, 26],
-          [226, 64, 26],
-          [223, 54, 24],
-          [223, 54, 24],
-          [221, 44, 22],
-          [217, 25, 20],
-          [216, 19, 19]
-        ];
-
       if (-99999 <= value && value < -48) {
         color = [16, 18, 51];
       } else if (-48 <= value && value < -46) {
@@ -221,11 +195,11 @@ TemperatureMap.prototype.getColor = function(levels, value) {
         color = [72, 156, 213];
       } else if (-4 <= value && value < -2) {
         color = [59, 197, 243];
-      } else if (-2 <= value && value < 0) {
-        color = [98, 202, 230];
       }
-      // 0 => 10
-      else if (0 <= value && value < 2) {
+      ////
+      else if (-2 <= value && value < 0) {
+        color = [98, 202, 230];
+      } else if (0 <= value && value < 2) {
         color = [97, 201, 225];
       } else if (2 <= value && value < 4) {
         color = [115, 204, 220];
@@ -236,7 +210,7 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       } else if (8 <= value && value < 10) {
         color = [205, 219, 45];
       }
-      // 10 => 20
+      ////
       else if (10 <= value && value < 12) {
         color = [218, 220, 52];
       } else if (12 <= value && value < 14) {
@@ -248,18 +222,40 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       } else if (18 <= value && value < 20) {
         color = [250, 172, 42];
       }
-      // 20 => 30
-      else if (20 <= value && value < 30) {
-        let indexColor = parseInt(value % 10);
-        color = orangeColor[indexColor];
+      ///
+      else if (20 <= value && value <= 22) {
+        color = [246, 161, 35];
+      } else if (22 <= value && value < 24) {
+        color = [247, 152, 45];
+      } else if (24 <= value && value < 26) {
+        color = [244, 126, 36];
+      } else if (26 <= value && value < 28) {
+        color = [239, 83, 39];
+      } else if (28 <= value && value < 30) {
+        color = [237, 114, 32];
       }
-      // 30 => 40
-      else if (30 <= value && value < 40) {
-        let indexColor = parseInt(value % 10);
-        color = redColor[indexColor];
-      } 
-
-       else if (40 <= value && value < 42) {
+      ///
+      else if (30 <= value && value < 31) {
+        color = [234, 104, 31];
+      } else if (31 <= value && value < 32) {
+        color = [234, 104, 31];
+      } else if (32 <= value && value < 33) {
+        color = [232, 96, 28];
+      } else if (33 <= value && value < 34) {
+        color = [232, 96, 28];
+      } else if (34 <= value && value < 35) {
+        color = [232, 87, 24];
+      } else if (35 <= value && value < 36) {
+        color = [232, 87, 24];
+      } else if (36 <= value && value < 37) {
+        color = [229, 45, 26];
+      } else if (37 <= value && value < 38) {
+        color = [251, 113, 107];
+      } else if (38 <= value && value < 39) {
+        color = [245, 96, 93];
+      } else if (39 <= value && value < 40) {
+        color = [243, 72, 69];
+      } else if (40 <= value && value < 42) {
         color = [216, 19, 19];
       } else if (42 <= value && value < 44) {
         color = [155, 21, 53];
@@ -503,60 +499,58 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
 
       arrTg[counter] = [dis, this.points[counter].value];
 
-      // for (let opt = 0; opt <= 7; opt++) {
-      //   let distance = (opt + 1) * 1.5 * 25000;
-      //   if (dis < distance) {
-      //     if (optionArr[opt] == undefined || optionArr[opt].length == 0) {
-      //       optionArr[opt] = Object.assign([], optionArr[opt]);
-      //       optionArr[opt].push([dis, this.points[counter].value, opt]);
-      //     } else if (optionArr[opt].length > 0 && optionArr[opt] != undefined) {
-      //       optionArr[opt].push([dis, this.points[counter].value, opt]);
-      //     }
-      //   }
-      // }
+      for (let opt = 0; opt <= 7; opt++) {
+        let distance = (opt + 1) * 1.5 * 25000;
+        if (dis < distance) {
+          if (optionArr[opt] == undefined || optionArr[opt].length == 0) {
+            optionArr[opt] = Object.assign([], optionArr[opt]);
+            optionArr[opt].push([dis, this.points[counter].value, opt]);
+          } else if (optionArr[opt].length > 0 && optionArr[opt] != undefined) {
+            optionArr[opt].push([dis, this.points[counter].value, opt]);
+          }
+        }
+      }
 
-      // // console.log('start');
-      // // optionArr.forEach(arr =>{
-      // //   console.log(arr.length);
-      // // })
-      // // console.log('end');
+      // console.log('start');
+      // optionArr.forEach(arr =>{
+      //   console.log(arr.length);
+      // })
+      // console.log('end');
 
-      // let radius = 6, requirePoint= 2;
-      // for (let arrIndex = 0; arrIndex < optionArr.length; arrIndex++) {
-      //   if (arrIndex == 0 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 1 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 2 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 3 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 4 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 5 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 6 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
-      //     break;
-      //   } else if (arrIndex == 7 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex].slice(0, 10);
-      //     break;
-      //   } else{
-      //     arr = arrTg;
-      //   }
-      // }
+      let radius = 6, requirePoint= 2;
+      for (let arrIndex = 0; arrIndex < optionArr.length; arrIndex++) {
+        if (arrIndex == 0 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 1 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 2 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 3 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 4 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 5 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 6 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex];
+          break;
+        } else if (arrIndex == 7 && optionArr[arrIndex].length > requirePoint) {
+          arr = optionArr[arrIndex].slice(0, 10);
+          break;
+        } else{
+          arr = arrTg;
+        }
+      }
     }
 
-    arr = arrTg;
-
     // noi suy diem
-    for (counter = 0; counter < arr.length; counter = counter + 1) {
+    for (let counter = 0; counter < arr.length; counter = counter + 1) {
       ptr = arr[counter];
       inv = 1 / Math.pow(ptr[0], pwr); // 1/ (khoảng cách ^2)
       // t = t + inv * this.points[ptr[1]].value; // gia tri noi suy cua diem
@@ -672,12 +666,25 @@ TemperatureMap.prototype.drawLow = function(limit, res, clean, callback) {
         col = self.getColor(false, val);
         str = "rgba(" + col[0] + ", " + col[1] + ", " + col[2] + ", ";
         // tạo gradient
-        gradient = ctx.createRadialGradient(x * this.zoom, y * this.zoom, 0, x * this.zoom, y * this.zoom, res * this.zoom);
+        gradient = ctx.createRadialGradient(x, y, 0, x, y, res);
         gradient.addColorStop(0, str + "1)");
         gradient.addColorStop(1, str + "1)");
         ctx.fillStyle = "#fcfcfc"; //<=== must be filled white for properly render
         ctx.fillStyle = gradient;
-        ctx.fillRect((x - res) * this.zoom, (y - res) * this.zoom, dbl* this.zoom, dbl * this.zoom);
+        ctx.fillRect(x - res, y - res, dbl, dbl);
+        ctx.fill();
+        ctx.closePath(); //<== must be closed
+      } else {
+        ctx.beginPath(); //<== beginpath
+        col = self.getColor(false, val);
+        str = "rgba(" + col[0] + ", " + col[1] + ", " + col[2] + ", ";
+        // tạo gradient
+        gradient = ctx.createRadialGradient(x, y, 0, x, y, res);
+        gradient.addColorStop(0, str + "0)");
+        gradient.addColorStop(1, str + "0)");
+        ctx.fillStyle = "#fcfcfc"; //<=== must be filled white for properly render
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x - res, y - res, dbl, dbl);
         ctx.fill();
         ctx.closePath(); //<== must be closed
       }
@@ -775,27 +782,27 @@ TemperatureMap.prototype.drawPoints = function(callback) {
     idx = 0,
     pnt;
 
-  // for (idx = 0; idx < self.points.length; idx = idx + 1) {
-  //   pnt = self.points[idx];
+  for (idx = 0; idx < self.points.length; idx = idx + 1) {
+    pnt = self.points[idx];
 
-  //   col = self.getColor(false, pnt.value);
+    col = self.getColor(false, pnt.value);
 
-  //   ctx.fillStyle = "rgba(255, 255, 255, 128)";
-  //   ctx.beginPath();
-  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-  //   ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 128)";
+    ctx.beginPath();
+    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+    ctx.fill();
 
-  //   ctx.lineWidth = 1;
-  //   ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
-  //   ctx.beginPath();
-  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-  //   ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
+    ctx.beginPath();
+    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+    ctx.stroke();
 
-  //   ctx.textAlign = "center";
-  //   ctx.textBaseline = "middle";
-  //   ctx.fillStyle = "rgb(0, 0, 0)";
-  //   ctx.fillText(pnt.value, pnt.x, pnt.y);
- // }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.fillText(pnt.value, pnt.x, pnt.y);
+  }
 
   if (typeof callback === "function") {
     callback();
