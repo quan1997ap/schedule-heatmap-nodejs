@@ -32,7 +32,7 @@ function createHeatMapBase64(
   height,
   heatmapType
 ) {
-  const zoom = 5;
+  const zoom = 1;
   const canvas = createCanvas(width * zoom, height * zoom);
   const ctx = canvas.getContext("2d");
   drw0 = new TemperatureMap(ctx, heatmapType, zoom);
@@ -256,8 +256,8 @@ function insertDataToTable(heatmapData, heatmapType) {
 }
 
 async function mainFunction() {
-  const degX = 0.00929791 / 12; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
-  const degY = 0.00903758 / 12; // degX <=> 100m 1 ô
+  const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
+  const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
   try {
     let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
     let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
