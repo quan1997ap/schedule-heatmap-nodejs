@@ -49,7 +49,7 @@ function getDBList() {
   });
 }
 
-async function connectDatabase() {
+function connectDatabase() {
   if (!connection) {
     fs.readFile("./emma.crt", (err, ssl) => {
       if (err) {
