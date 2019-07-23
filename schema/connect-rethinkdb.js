@@ -51,7 +51,7 @@ function getDBList() {
 
 async function connectDatabase() {
   if (!connection) {
-    fs.readFile("./schema/emma.crt", (err, ssl) => {
+    fs.readFile("./emma.crt", (err, ssl) => {
       if (err) {
         console.log("Can't read/find emma.crt ", err);
       } else {
