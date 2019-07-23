@@ -380,18 +380,18 @@ async function mainFunction() {
 }
 
 let runTaskDrawHeatMap = () => {
-  // schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
-  //   console.log('run-draw-heatmap');
-  //   mainFunction();
-  // });
+  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
+    console.log('run-draw-heatmap');
+    mainFunction();
+  });
 
-  schedule.scheduleJob(
-    { start: startTime, rule: "*/30 * * * * *" },
-    function() {
-      console.log("run-draw-heatmap");
-      mainFunction();
-    }
-  );
+  // schedule.scheduleJob(
+  //   { start: startTime, rule: "*/30 * * * * *" },
+  //   function() {
+  //     console.log("run-draw-heatmap");
+  //     mainFunction();
+  //   }
+  // );
   
   //  mainFunction();
 };
