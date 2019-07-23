@@ -7,7 +7,7 @@ const fs = require("fs"); // di tu thu muc goc cua ung  dung
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);
 var schedule = require("node-schedule");
-var rethinkdb = require("../schema/connect-rethinkdb");
+var rethinkdbdash = require("../schema/connect-rethinkdb");
 
 // https://www.npmjs.com/package/node-schedule
 // thoi gian bat dau, ket thuc , sau 1s chay lai (chú ý dấu *)
@@ -22,7 +22,7 @@ var rethinkdb = require("../schema/connect-rethinkdb");
 // https://nominatim.openstreetmap.org/search.php?q=ha+noi+viet+nam&polygon_geojson=1&format=json
 
 // degX = 0.00929791 / (độ chia);
-// độ chia càng lớn => độ zoom càng nhỏ => nên đặt zoom = 1 / độ chia = 10 
+// độ chia càng lớn => độ zoom càng nhỏ => nên đặt zoom = 1 / độ chia = 10
 
 function createHeatMapBase64(
   pointAffectNumber,
@@ -42,14 +42,14 @@ function createHeatMapBase64(
   // drw0.drawFull(true, function () { });
 
   // mức độ chi tiết vừa
-  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
-  // drw0.drawFull(false, function() {
-  //   drw0.drawPoints();
-  // });
+  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height);
+  drw0.drawFull(false, function() {
+    drw0.drawPoints();
+  });
 
   // mức độ chi tiết thấp
-  drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
-  drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
+  // drw0.setDataPoints(knownPoints, boundaryCanvas, width, height); //  tạo dữ liệu để vẽ arrAllPoint, arrBoundaryCanvas, width, height
+  // drw0.drawLow(pointAffectNumber, 2, false); // bỏ callback
 
   return canvas.toDataURL();
 }
@@ -215,7 +215,7 @@ function writeFile(pathname, content) {
   });
 }
 
-function getCurrentTime() {
+getCurrentTime = () => {
   let currentdate = new Date();
   let datetime =
     "Run at : " +
@@ -231,29 +231,29 @@ function getCurrentTime() {
     ":" +
     currentdate.getSeconds();
   return datetime;
+};
+
+function insertHeatmapTable(r, connection, heatmapData, heatmapType) {
+  if (connection || connection.open == true) {
+    r.table("heatmaps")
+      .insert([
+        {
+          heatmap: heatmapData,
+          type: heatmapType,
+          create_at: getCurrentTime(),
+          date: Date.now()
+        }
+      ])
+      .run(connection, (err, res) => {
+        if (err) {
+          console.log('err connection');
+        } else {
+          {   console.log(res)   }
+        }
+      });
+  }
 }
 
-function insertDataToTable(heatmapData, heatmapType) {
-  r.db("quandev");
-  r.table("heatmaps")
-    .insert([
-      {
-        heatmap: heatmapData,
-        type: heatmapType,
-        create_at: getCurrentTime(),
-        date: Date.now()
-      }
-    ])
-    .run(rethinkdb.connection, (err, res) => {
-      if (err) {
-        console.log(err);
-      } else {
-        {
-          console.log(res, getCurrentTime());
-        }
-      }
-    });
-}
 
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
@@ -268,28 +268,28 @@ async function mainFunction() {
         weatherData.districtId,
         provinceList
       );
-  
+
       if (resCheckProvince.result === true) {
         // nếu tỉnh nằm  trong các tỉnh đã có dữ liệu boundary => tạo heat map
         // boundary của tỉnh sẽ vẽ canvas
         let boundaryProvinceCanvas = resCheckProvince.boundary;
-  
+
         // lấy các giá trị của hình chữ nhật bao quanh canvas( sử dụng để gán heatMapImg trên ggmap)
         // boundaryProvinceCanvas : viền bao quanh của tỉnh
         // boundingBoxRectangle : khung viền hình chữ nhật
-  
+
         let boundingBoxRectangle = getBoundingBoxRectangle(
           boundaryProvinceCanvas
         );
-  
+
         let minLat = boundingBoxRectangle.minLat;
         let maxLat = boundingBoxRectangle.maxLat;
         let minLng = boundingBoxRectangle.minLng;
         let maxLng = boundingBoxRectangle.maxLng;
-  
+
         let number_X = parseInt((maxLat - minLat) / degX); // width height Canvas (theo số ô) // số ô  trên 1 trục(1 ô có chiều rộng 0.1 km = 100m)
         let number_Y = parseInt((maxLng - minLng) / degY);
-  
+
         //tạo boundary với dữ liệu nội suy
         let boundaryLength = boundaryProvinceCanvas.length; // số điểm tác động lên việc nội suy
         let boundaryOfHeatMapCanvas = []; // Đường viền sau khi chia về khoảng cách trong canvas
@@ -299,14 +299,14 @@ async function mainFunction() {
             x: parseInt((boundaryProvinceCanvas[count][0] - minLng) / degY)
           });
         }
-  
+
         // mảng các điểm đã biết
         // aqiValue; tempValue; pm2Value; humidityValue;
-  
+
         let knownAQIPoints = [],
           knownTempPoints = [],
           knownHumidityPoints = [];
-  
+
         let knowPointLength = currentWeatherData[1].length; // tất cả các điểm ở việt nam
         for (let i = 0; i < knowPointLength; i++) {
           if (
@@ -335,7 +335,7 @@ async function mainFunction() {
             });
           }
         }
-  
+
         let heatmapTypes = ["temperature"]; //temperature humidity AQI tempHLS
         let typeIndex = 0;
         while (typeIndex < heatmapTypes.length) {
@@ -343,6 +343,9 @@ async function mainFunction() {
             heatMapImg = "";
           switch (heatmapTypes[typeIndex]) {
             case "temperature":
+              knownPoints = knownTempPoints;
+              break;
+            case "tempHLS":
               knownPoints = knownTempPoints;
               break;
             case "humidity":
@@ -361,25 +364,36 @@ async function mainFunction() {
             number_X,
             heatmapTypes[typeIndex]
           );
-          // insertDataToTable(heatMapImg, heatmapTypes[typeIndex]);
-          writeFile("./public/json/heatmap.txt", heatMapImg);
-          console.log("heatMap created");
+          // rethinkDdConnection.insertDataToHeatmapTable(heatMapImg, heatmapTypes[typeIndex]);
+          let rethinkConnection = rethinkdbdash.getConnection();
+          let r = rethinkdbdash.r;
+          insertHeatmapTable(r, rethinkConnection, heatMapImg, heatmapTypes[typeIndex] );
+          // writeFile("./public/json/heatmap.txt", heatMapImg);
+            console.log("heatMap created");
           typeIndex++;
         }
       }
     });
   } catch (errAwait) {
-    console.log('await error',errAwait);
+    console.log("await error", errAwait);
   }
-
 }
 
 let runTaskDrawHeatMap = () => {
-  // schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
-  //   console.log('run-draw-heatmap');
-  //   mainFunction();
-  // });
-  mainFunction();
+  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
+    console.log('run-draw-heatmap');
+    mainFunction();
+  });
+
+  // schedule.scheduleJob(
+  //   { start: startTime, rule: "*/15 * * * * *" },
+  //   function() {
+  //     console.log("run-draw-heatmap");
+  //     mainFunction();
+  //   }
+  // );
+  
+  //  mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

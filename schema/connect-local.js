@@ -1,17 +1,17 @@
-var fs = require("fs");
-var r = require("rethinkdbdash")({
-  pool: false,
-  // cursor: true,
-  ssl: true
-});
+r = require("rethinkdbdash")();
 
 // rethink Option
 const server = "re1.emmasoft.com.vn"; //"127.0.0.1:27017"  REPLACE WITH YOUR DB SERVER
 const database = "quandev"; // REPLACE WITH YOUR DB NAME
-const databaseLocal = "quandev";
 const username = "quandev";
 const password = "quandev-_6543quandev21";
+
+// localhost Option
 const port = 28015;
+const host = "localhost"; //  REPLACE WITH YOUR DB SERVER
+const databaseLocal = "giapha"; // REPLACE WITH YOUR DB NAME
+
+var fs = require("fs");
 
 var connection = null;
 
@@ -25,14 +25,13 @@ function keepConnection() {
       connection.reconnect(
         { noreplyWait: false },
         (errorReconnect, _reconnection) => {
-          if (errorReconnect) console.log("Failed to reconnect");
+          if (errorReconnect) console.log(errorReconnect);
           else {
-            console.log("Reconnect success");
             connection = _reconnection;
           }
         }
       );
-      console.log("Connection is closed");
+      console.log("connection is closed");
     }
   }, 3000);
 }
@@ -55,7 +54,7 @@ async function connectDatabase() {
       if (err) {
         console.log("Can't read/find emma.crt ", err);
       } else {
-        let rethinkdbLocalOptions = {
+        let rethinkdbOptions = {
           db: databaseLocal,
           pool: false,
           buffer: 1000,
@@ -67,32 +66,13 @@ async function connectDatabase() {
           servers: [{ host: "192.168.0.100", port: 28015 }]
         };
 
-        let rethinkdbOptions = {
-          host: server,
-          port: port,
-          db: database,
-          username: username,
-          user: username,
-          password: password,
-          pool: false,
-          buffer: 1000,
-          max: 300,
-          timeout: 100,
-          pingInterval: 10,
-          timeoutError: 1000, // thoi gian chờ trước khi reconnect
-          silent: true,
-          ssl: {
-            ca: ssl
-          }
-        };
-
         r.connect(rethinkdbOptions).then(successConnection => {
           console.log("RethinkDB connect successfully");
           connection = successConnection;
 
           connection.on("error", err => {
             try {
-              // gặp lỗi trong quá trình connect => hủy connection và kết nối lại tới database (GÁN NULL ĐỂ CHECK CHO DỄ :))
+              // gặp lỗi trong quá trình connect => hủy connection và kết nối lại tới database (GÁN NULL ĐỂ CHECK CHO DỄ :)) 
               connection.close();
               connection = null;
               connectDatabase();
@@ -106,12 +86,29 @@ async function connectDatabase() {
   }
 }
 
+getCurrentTime = () => {
+  let currentdate = new Date();
+  let datetime =
+    "Run at : " +
+    currentdate.getDate() +
+    "/" +
+    (currentdate.getMonth() + 1) +
+    "/" +
+    currentdate.getFullYear() +
+    " " +
+    currentdate.getHours() +
+    ":" +
+    currentdate.getMinutes() +
+    ":" +
+    currentdate.getSeconds();
+  return datetime;
+};
+
 function getConnection() {
   return connection;
 }
 
 module.exports = {
-  r,
   getConnection,
   connectDatabase,
   keepConnection

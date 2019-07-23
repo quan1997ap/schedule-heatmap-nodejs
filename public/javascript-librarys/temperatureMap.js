@@ -68,7 +68,7 @@ function degToHsl(deg) {
   let s = 100;
   let l = 50;
   if (deg <= 40) {
-    h = parseInt(270 - 6.75 * deg); // degMax = 40*C => Hmax = 270 => 1 *c = 6.75 khoang (270/ 45)
+    h = parseInt(270 - 6.75 * deg); // degMax = 40*C => Hmax = 270 => 1 *c = 6.75 khoang (270/ 40)
     return { h, s, l };
   } else if (deg > 40 && deg < 50) {
     // 50 *c = 288*
@@ -148,7 +148,32 @@ TemperatureMap.prototype.getColor = function(levels, value) {
   let color;
   switch (this.heatmapType) {
     case "temperature":
-      let orangeColor = [
+      // length = 10;
+
+      let blueColor = [
+          [101, 202, 221],
+          [116, 204, 198],
+          [127, 206, 183],
+          [138, 207, 166],
+          [152, 210, 147],
+          [163, 211, 129],
+          [176, 213, 112],
+          [187, 215, 98],
+          [199, 217, 79],
+          [215, 220, 56]
+        ],yellowColor = [
+          [219, 219, 52],
+          [222, 211, 49],
+          [225, 205, 48],
+          [228, 200, 46],
+          [230, 194, 45],
+          [233, 187, 42],
+          [236, 182, 41],
+          [238, 176, 39],
+          [241, 170, 37],
+          [246, 163, 36]
+        ],
+        orangeColor = [
           [245, 157, 34],
           [244, 151, 35],
           [243, 146, 34],
@@ -171,6 +196,18 @@ TemperatureMap.prototype.getColor = function(levels, value) {
           [221, 44, 22],
           [217, 25, 20],
           [216, 19, 19]
+        ],
+        brown_redColor = [
+          [216, 19, 19],
+          [208, 19, 19],
+          [202, 19, 19],
+          [196, 18, 18],
+          [190, 18, 18],
+          [185, 18, 18],
+          [179, 18, 18],
+          [173, 17, 17],
+          [167, 17, 17],
+          [159, 16, 16]
         ];
 
       if (-99999 <= value && value < -48) {
@@ -225,28 +262,14 @@ TemperatureMap.prototype.getColor = function(levels, value) {
         color = [98, 202, 230];
       }
       // 0 => 10
-      else if (0 <= value && value < 2) {
-        color = [97, 201, 225];
-      } else if (2 <= value && value < 4) {
-        color = [115, 204, 220];
-      } else if (4 <= value && value < 6) {
-        color = [116, 197, 158];
-      } else if (6 <= value && value < 8) {
-        color = [151, 201, 61];
-      } else if (8 <= value && value < 10) {
-        color = [205, 219, 45];
+      else if (0 <= value && value < 10) {
+        let indexColor = parseInt(value % 10);
+        color = blueColor[indexColor];
       }
       // 10 => 20
-      else if (10 <= value && value < 12) {
-        color = [218, 220, 52];
-      } else if (12 <= value && value < 14) {
-        color = [243, 234, 64];
-      } else if (14 <= value && value < 16) {
-        color = [250, 230, 39];
-      } else if (16 <= value && value < 18) {
-        color = [255, 205, 46];
-      } else if (18 <= value && value < 20) {
-        color = [250, 172, 42];
+      else if (10 <= value && value < 20) {
+        let indexColor = parseInt(value % 10);
+        color = yellowColor[indexColor];
       }
       // 20 => 30
       else if (20 <= value && value < 30) {
@@ -257,19 +280,14 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       else if (30 <= value && value < 40) {
         let indexColor = parseInt(value % 10);
         color = redColor[indexColor];
-      } 
-
-       else if (40 <= value && value < 42) {
-        color = [216, 19, 19];
-      } else if (42 <= value && value < 44) {
-        color = [155, 21, 53];
-      } else if (44 <= value && value < 46) {
-        color = [198, 20, 20];
-      } else if (46 <= value && value < 48) {
-        color = [130, 17, 55];
-      } else if (48 <= value && value < 50) {
-        color = [117, 16, 55];
-      } else if (50 <= value && value <= 99999) {
+      }
+      // 40 => 50
+      else if (40 <= value && value < 50) {
+        let indexColor = parseInt(value % 10);
+        color = brown_redColor[indexColor];
+      }
+      //  50 =>
+      else if (50 <= value && value <= 99999) {
         color = [255, 255, 255];
       } else if (value > 99999) {
         color = [255, 255, 255];
@@ -496,13 +514,14 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
     for (let counter = 0; counter < this.points.length; counter = counter + 1) {
       dis = TemperatureMap.squareDistance(point, this.points[counter]);
       // if (dis === 0) {
-      if (0 <= dis && dis <= 3) {
+      if (0 <= dis && dis <= 5) {
         // khi vẽ, nếu điểm nội suy trung với điểm có sẵn thì không nội suy nữa mà lấy luôn giá trị
         return this.points[counter].value;
       }
 
       arrTg[counter] = [dis, this.points[counter].value];
 
+      //start
       // for (let opt = 0; opt <= 7; opt++) {
       //   let distance = (opt + 1) * 1.5 * 25000;
       //   if (dis < distance) {
@@ -515,42 +534,43 @@ TemperatureMap.prototype.getPointValue = function(limit, point) {
       //   }
       // }
 
-      // // console.log('start');
-      // // optionArr.forEach(arr =>{
-      // //   console.log(arr.length);
-      // // })
-      // // console.log('end');
+      // optionArr.forEach(arr => {
+      //   arr.sort(function(a, b) {
+      //     return a[0] - b[0];
+      //   });
+      // });
 
-      // let radius = 6, requirePoint= 2;
+      // let requirePoint = 3;
       // for (let arrIndex = 0; arrIndex < optionArr.length; arrIndex++) {
       //   if (arrIndex == 0 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 1 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 2 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 3 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 4 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 5 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 6 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex];
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
       //   } else if (arrIndex == 7 && optionArr[arrIndex].length > requirePoint) {
-      //     arr = optionArr[arrIndex].slice(0, 10);
+      //     arr = optionArr[arrIndex].slice(0,requirePoint);
       //     break;
-      //   } else{
+      //   } else {
       //     arr = arrTg;
       //   }
       // }
+      //end
     }
 
     arr = arrTg;
@@ -594,7 +614,8 @@ TemperatureMap.prototype.setConvexhullPolygon = function(
   });
 
   this.limits.yMin = boundaryPointsUseGetLimit[0].y;
-  this.limits.yMax = boundaryPointsUseGetLimit[lengthBoundary - 1].y;
+  this.limits.yMax = boundaryPointsUseGetLimit[lengthBoundary].y;
+  // this.limits.yMax = boundaryPointsUseGetLimit[lengthBoundary - 1].y;
 
   // Sort by 'x' to get convex hull polygon and xMin/xMax
   boundaryPointsUseGetLimit.sort(function(a, b) {
@@ -672,12 +693,24 @@ TemperatureMap.prototype.drawLow = function(limit, res, clean, callback) {
         col = self.getColor(false, val);
         str = "rgba(" + col[0] + ", " + col[1] + ", " + col[2] + ", ";
         // tạo gradient
-        gradient = ctx.createRadialGradient(x * this.zoom, y * this.zoom, 0, x * this.zoom, y * this.zoom, res * this.zoom);
+        gradient = ctx.createRadialGradient(
+          x * this.zoom,
+          y * this.zoom,
+          0,
+          x * this.zoom,
+          y * this.zoom,
+          res * this.zoom
+        );
         gradient.addColorStop(0, str + "1)");
         gradient.addColorStop(1, str + "1)");
         ctx.fillStyle = "#fcfcfc"; //<=== must be filled white for properly render
         ctx.fillStyle = gradient;
-        ctx.fillRect((x - res) * this.zoom, (y - res) * this.zoom, dbl* this.zoom, dbl * this.zoom);
+        ctx.fillRect(
+          (x - res) * this.zoom,
+          (y - res) * this.zoom,
+          dbl * this.zoom,
+          dbl * this.zoom
+        );
         ctx.fill();
         ctx.closePath(); //<== must be closed
       }
@@ -775,27 +808,27 @@ TemperatureMap.prototype.drawPoints = function(callback) {
     idx = 0,
     pnt;
 
-  // for (idx = 0; idx < self.points.length; idx = idx + 1) {
-  //   pnt = self.points[idx];
+  for (idx = 0; idx < self.points.length; idx = idx + 1) {
+    pnt = self.points[idx];
 
-  //   col = self.getColor(false, pnt.value);
+    col = self.getColor(false, pnt.value);
 
-  //   ctx.fillStyle = "rgba(255, 255, 255, 128)";
-  //   ctx.beginPath();
-  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-  //   ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 128)";
+    ctx.beginPath();
+    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+    ctx.fill();
 
-  //   ctx.lineWidth = 1;
-  //   ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
-  //   ctx.beginPath();
-  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-  //   ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
+    ctx.beginPath();
+    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+    ctx.stroke();
 
-  //   ctx.textAlign = "center";
-  //   ctx.textBaseline = "middle";
-  //   ctx.fillStyle = "rgb(0, 0, 0)";
-  //   ctx.fillText(pnt.value, pnt.x, pnt.y);
- // }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.fillText(pnt.value, pnt.x, pnt.y);
+  }
 
   if (typeof callback === "function") {
     callback();

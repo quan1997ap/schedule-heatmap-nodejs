@@ -6,10 +6,13 @@ var logger = require('morgan');
 var cors = require('cors');
 
 // import router
+var http = require('http');
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
-var connectRethinkDB = require('./schema/connect-rethinkdb');
-var http = require('http');
+
+var  rethinkDdConnection= require("./schema/connect-rethinkdb");
+rethinkDdConnection.connectDatabase();
+rethinkDdConnection.keepConnection();
 // run schedule
 var createHeatMap = require("./schema/schedule-create-heatmap");
 createHeatMap.runTaskDrawHeatMap();
@@ -48,7 +51,8 @@ app.use(function(err, req, res, next) {
 });
 
 
-var port = process.env.PORT || 8080
+var port = process.env.PORT || 8080 ;
+// var port = 5000;
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 setInterval(function() {

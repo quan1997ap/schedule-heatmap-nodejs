@@ -2,54 +2,58 @@ var express = require("express");
 var router = express.Router();
 var rethinkdb = require("../schema/connect-rethinkdb");
 const CircularJSON = require("circular-json");
-
-var createHeatMap = require("../schema/schedule-create-heatmap"); // create connect to rethinkDB
-var http = require('http');
+var rethinkdbdash = require("../schema/connect-rethinkdb");
 
 router.get("/", (request, response) => {
-  r.table('heatmaps')
-  .run(rethinkdb.connection, (err, res) => {
+  rethinkdbdash.r.table('heatmaps')
+  .run(rethinkdbdash.getConnection(), (err, res) => {
     if (err) {
-      console.log(err);
+      response.json({
+        success: false,
+        code: 500
+      });
+      console.log('c');
     } else {
       {
-        const resJson = JSON.parse(CircularJSON.stringify(res))._responses;
-        if (resJson.length > 0) {
+        // const resJson = JSON.parse(CircularJSON.stringify(res))._responses;
           response.json({
             success: true,
-            data: resJson[0].r,
+            data: res,
             code: 200
           });
-        } else {
-          response.json({
-            success: true,
-            data: [],
-            code: 200
-          });
-        }
       }
     }
   });
 });
 
-
-// router.get("/active", (request, response) => {
-//   setInterval(function() {
-//     console.log('wakeup - server - heroku');
-//     http.get("http://pam-air.herokuapp.com/");
-//   }, 300000); // every 5 minutes (300000)
-  
-//   createHeatMap.runTaskDrawHeatMap();
-//   response.send('active success');
-//   response.end();
-// });
-
-router.get("/:id", (request, response) => {
-  response.json({
-    success: true,
-    data: "success",
-    code: 200
+router.get("/current-day", (request, response) => {
+  rethinkdbdash.r.table('heatmaps')
+  // .filter(
+  //   r.row('date').during(
+  //     r.epochTime(1512864000000 / 1000), 
+  //     r.epochTime(1513209600000 / 1000),
+  //     {leftBound: "open", rightBound: "closed"}
+  //   )
+  // )
+  .run(rethinkdbdash.getConnection(), (err, res) => {
+    if (err) {
+      response.json({
+        success: false,
+        code: 500
+      });
+      console.log('c');
+    } else {
+      {
+        // const resJson = JSON.parse(CircularJSON.stringify(res))._responses;
+          response.json({
+            success: true,
+            data: res,
+            code: 200
+          });
+      }
+    }
   });
 });
+
 
 module.exports = router;

@@ -1,2 +1,5 @@
 /node_modules
 /schema/emma.crt
+
+# git rm -r --cached .
+# git add commit và push 
