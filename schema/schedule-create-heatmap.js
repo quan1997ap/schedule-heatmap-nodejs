@@ -411,6 +411,7 @@ let runTaskDrawHeatMap = () => {
   //   }
   // );
   // mainFunction();
+  
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;
