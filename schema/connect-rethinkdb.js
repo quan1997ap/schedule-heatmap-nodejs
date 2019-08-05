@@ -15,13 +15,14 @@ const port = 28015;
 
 var connection = null;
 
-function keepConnection() {
+function keepConnection(pathToSSL) {
   setInterval(() => {
     if (!connection) {
       // trường hợp chưa có kết nối tới db => tạo kết nối
-      connectDatabase();
+      connectDatabase(pathToSSL);
     } else if (connection.open == false) {
       // trường hợp kết nối tới db đang close (do db shutdown) => reconnect để open Connect
+      console.log("Connection is closed");
       connection.reconnect(
         { noreplyWait: false },
         (errorReconnect, _reconnection) => {
@@ -32,7 +33,6 @@ function keepConnection() {
           }
         }
       );
-      console.log("Connection is closed");
     }
   }, 3000);
 }
@@ -49,10 +49,11 @@ function getDBList() {
   });
 }
 
-function connectDatabase() {
+function connectDatabase(pathToSSL) {
   if (!connection) {
-    fs.readFile("./schema/emma.crt", (err, ssl) => {
+    fs.readFile(pathToSSL, (err, ssl) => {
       // vì gọi từ app.js vào để tìm file emma.crt
+      console.log(__dirname);
       if (err) {
         console.log("Can't read/find emma.crt ", err);
       } else {
@@ -96,7 +97,7 @@ function connectDatabase() {
               // gặp lỗi trong quá trình connect => hủy connection và kết nối lại tới database (GÁN NULL ĐỂ CHECK CHO DỄ :))
               connection.close();
               connection = null;
-              connectDatabase();
+              connectDatabase(pathToSSL);
             } catch (closeConnectionError) {
               console.log("closeConnectionError");
             }

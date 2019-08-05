@@ -2,7 +2,9 @@ var axios = require("axios");
 var TemperatureMap = require("../public/javascript-librarys/temperatureMap");
 const { createCanvas, loadImage } = require("canvas");
 var axios = require("axios");
+var environment = require("../config/config");
 const fs = require("fs"); // di tu thu muc goc cua ung  dung
+// const axiosRetry = require("axios-retry");
 
 let startTime = new Date(Date.now());
 let endTime = new Date(startTime.getTime() + 5000);
@@ -75,25 +77,34 @@ function getBoundingBoxRectangle(boundingArr) {
   return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
 }
 
-function getBoundingOfProvinceById(provinceId, provinceList) {
+function getBoundingOfProvinceById(districtId, provinceList) {
   // cy Lặp => đúng thì thay kết quả và trả về, sai thì thôi;
   let length = provinceList.length;
   let i;
   let result = { result: false, boundary: [] };
   if (length > 0) {
     for (i = 0; i < length; i++) {
-      if (
-        provinceId === provinceList[i].id &&
-        provinceId !== "" &&
-        provinceId !== undefined
-      ) {
-        // console.log(i, '-' ,provinceList[i].id, '- ', provinceId )
-        result = { result: true, boundary: provinceList[i].boundary };
-        // break;
+      if ( districtId &&  districtId === provinceList[i].districtId ) {
+        result = provinceList[i].info.boundary ?  { result: true, boundary: provinceList[i].info.boundary, districtId: districtId } : [];
       }
     }
   }
   return result;
+}
+
+function getAllBoundingBox() {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(environment.apiUrl.baseUrl + "no/ref/13", { method: "get" })
+      .then(result => {
+        if (result.data.PHHAPI.header.code == 0) {
+          resolve(result.data.PHHAPI.body)
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  });
 }
 
 function getCurrentWeatherData() {
@@ -238,40 +249,43 @@ function insertHeatmapTable(r, connection, heatmapData, heatmapType) {
     r.table("heatmaps")
       .insert([
         {
-          heatmap: heatmapData,
           type: heatmapType,
           create_at: getCurrentTime(),
-          date: Date.now()
+          date: Date.now(),
+          heatmap: heatmapData
         }
       ])
       .run(connection, (err, res) => {
         if (err) {
-          console.log('err connection');
+          console.log("err connection");
         } else {
-          {   console.log(res)   }
+          {
+            console.log(res);
+          }
         }
       });
   }
 }
 
-
 async function mainFunction() {
   const degX = 0.00929791 / 10; // 1deg(lat) trên GG map ứng với = 0.00929791 Km
   const degY = 0.00903758 / 10; // degX <=> 100m 1 ô
   try {
-    let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
+    // let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
     let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
+    let boundaryList = await getAllBoundingBox();// bounding box của các tỉnh có dữ liệu
     let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại;
     currentWeatherData[0].forEach(weatherData => {
-      // kiểm tra tỉnh này có trong danh sách cáct tỉnh đủ điều kiện tạo heatnao chua
+      // kiểm tra tỉnh này có trong danh sách cáct tỉnh đủ điều kiện tạo  chưa
       let resCheckProvince = getBoundingOfProvinceById(
         weatherData.districtId,
-        provinceList
+        boundaryList
       );
 
-      if (resCheckProvince.result === true) {
+      if (resCheckProvince.result === true && resCheckProvince.boundary.length > 0 ) {
         // nếu tỉnh nằm  trong các tỉnh đã có dữ liệu boundary => tạo heat map
         // boundary của tỉnh sẽ vẽ canvas
+        // console.log(resCheckProvince.districtId); // các tỉnh sẽ dc vẽ
         let boundaryProvinceCanvas = resCheckProvince.boundary;
 
         // lấy các giá trị của hình chữ nhật bao quanh canvas( sử dụng để gán heatMapImg trên ggmap)
@@ -336,7 +350,7 @@ async function mainFunction() {
           }
         }
 
-        let heatmapTypes = ["temperature"]; //temperature humidity AQI tempHLS
+        let heatmapTypes = ["temperature", "humidity", "AQI"]; //temperature humidity AQI tempHLS
         let typeIndex = 0;
         while (typeIndex < heatmapTypes.length) {
           let knownPoints = [],
@@ -364,12 +378,17 @@ async function mainFunction() {
             number_X,
             heatmapTypes[typeIndex]
           );
-          // rethinkDdConnection.insertDataToHeatmapTable(heatMapImg, heatmapTypes[typeIndex]);
+        
           let rethinkConnection = rethinkdbdash.getConnection();
           let r = rethinkdbdash.r;
-          insertHeatmapTable(r, rethinkConnection, heatMapImg, heatmapTypes[typeIndex] );
+          insertHeatmapTable(
+            r,
+            rethinkConnection,
+            heatMapImg,
+            heatmapTypes[typeIndex]
+          );
           // writeFile("./public/json/heatmap.txt", heatMapImg);
-            console.log("heatMap created");
+          console.log("heatMap created");
           typeIndex++;
         }
       }
@@ -380,11 +399,10 @@ async function mainFunction() {
 }
 
 let runTaskDrawHeatMap = () => {
-  schedule.scheduleJob({ start: startTime, rule: '15 * * * *' }, function() {
-    console.log('run-draw-heatmap');
+  schedule.scheduleJob({ start: startTime, rule: "15 * * * *" }, function() {
+    console.log("run-draw-heatmap");
     mainFunction();
   });
-
   // schedule.scheduleJob(
   //   { start: startTime, rule: "*/30 * * * * *" },
   //   function() {
@@ -392,8 +410,7 @@ let runTaskDrawHeatMap = () => {
   //     mainFunction();
   //   }
   // );
-  
-  //  mainFunction();
+  // mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

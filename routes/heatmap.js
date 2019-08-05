@@ -34,6 +34,7 @@ router.get("/current-day", (request, response) => {
         success: false,
         code: 500
       });
+      res.end();
     } else {
       {
         // const resJson = JSON.parse(CircularJSON.stringify(res))._responses;

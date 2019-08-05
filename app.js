@@ -11,8 +11,9 @@ var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
 
 var  rethinkDdConnection= require("./schema/connect-rethinkdb");
-rethinkDdConnection.connectDatabase();
+rethinkDdConnection.connectDatabase("./schema/emma.crt"); // path to ssl
 rethinkDdConnection.keepConnection();
+
 // run schedule
 var createHeatMap = require("./schema/schedule-create-heatmap");
 createHeatMap.runTaskDrawHeatMap();
