@@ -147,7 +147,7 @@ function hexToRGB(h) {
 TemperatureMap.prototype.getColor = function(levels, value) {
   let color;
   switch (this.heatmapType) {
-    case "temperature":
+    case "Temp":
       // length = 10;
 
       let blueColor = [
@@ -301,7 +301,7 @@ TemperatureMap.prototype.getColor = function(levels, value) {
       color = hslToRgb(degToHsl(value).h, degToHsl(value).s, degToHsl(value).l);
       break;
 
-    case "humidity":
+    case "Humidity":
       if (0 <= value && value < 5) {
         color = [153, 92, 52];
       } else if (5 <= value && value < 10) {
@@ -808,27 +808,27 @@ TemperatureMap.prototype.drawPoints = function(callback) {
     idx = 0,
     pnt;
 
-  for (idx = 0; idx < self.points.length; idx = idx + 1) {
-    pnt = self.points[idx];
+  // for (idx = 0; idx < self.points.length; idx = idx + 1) {
+  //   pnt = self.points[idx];
 
-    col = self.getColor(false, pnt.value);
+  //   col = self.getColor(false, pnt.value);
 
-    ctx.fillStyle = "rgba(255, 255, 255, 128)";
-    ctx.beginPath();
-    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-    ctx.fill();
+  //   ctx.fillStyle = "rgba(255, 255, 255, 128)";
+  //   ctx.beginPath();
+  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+  //   ctx.fill();
 
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
-    ctx.beginPath();
-    ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
-    ctx.stroke();
+  //   ctx.lineWidth = 1;
+  //   ctx.strokeStyle = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
+  //   ctx.beginPath();
+  //   ctx.arc(pnt.x, pnt.y, 0, 0, PI2, false);
+  //   ctx.stroke();
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgb(0, 0, 0)";
-    ctx.fillText(pnt.value, pnt.x, pnt.y);
-  }
+  //   ctx.textAlign = "center";
+  //   ctx.textBaseline = "middle";
+  //   ctx.fillStyle = "rgb(0, 0, 0)";
+  //   ctx.fillText(pnt.value, pnt.x, pnt.y);
+  // }
 
   if (typeof callback === "function") {
     callback();
