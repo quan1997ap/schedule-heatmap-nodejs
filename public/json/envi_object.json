@@ -1,5 +1,5 @@
 [
     {"enviobjectid" : "_2_0_SHT1X", "name": "Humidity" },
     {"enviobjectid" : "_2_2_SHT1X", "name": "Temp" },
-    {"enviobjectid" : "AQI", "name": "AQI" }
+    {"enviobjectid" : "aqi_us_1h", "name": "AQI" }
 ]

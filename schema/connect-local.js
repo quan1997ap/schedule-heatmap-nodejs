@@ -19,7 +19,7 @@ function keepConnection(pathToSSL) {
   setInterval(() => {
     if (!connection) {
       // trường hợp chưa có kết nối tới db => tạo kết nối
-      connectDatabase(pathToSSL);
+      connectRethinkDb(pathToSSL);
     } else if (connection.open == false) {
       // trường hợp kết nối tới db đang close (do db shutdown) => reconnect để open Connect
       connection.reconnect(
@@ -48,7 +48,7 @@ function getDBList() {
   });
 }
 
-async function connectDatabase(pathToSSL) {
+async function connectRethinkDb(pathToSSL) {
   if (!connection) {
     fs.readFile(pathToSSL, (err, ssl) => {
       if (err) {
@@ -75,7 +75,7 @@ async function connectDatabase(pathToSSL) {
               // gặp lỗi trong quá trình connect => hủy connection và kết nối lại tới database (GÁN NULL ĐỂ CHECK CHO DỄ :)) 
               connection.close();
               connection = null;
-              connectDatabase(pathToSSL);
+              connectRethinkDb(pathToSSL);
             } catch (closeConnectionError) {
               console.log("closeConnectionError");
             }
@@ -110,6 +110,6 @@ function getConnection() {
 
 module.exports = {
   getConnection,
-  connectDatabase,
+  connectRethinkDb,
   keepConnection
 };

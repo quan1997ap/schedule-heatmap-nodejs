@@ -10,9 +10,14 @@ var http = require('http');
 var indexRouter = require('./routes/index');
 var heatmapRouter = require('./routes/heatmap');
 
+// connect to mongodb
+// var mongodbConnection = require("./schema/connect-mongodb"); // create connect to mongoDB 
+
+// connect to rethinkdb
 var  rethinkDdConnection= require("./schema/connect-rethinkdb");
-rethinkDdConnection.connectDatabase("./schema/emma.crt"); // path to ssl
+rethinkDdConnection.connectRethinkDb("./schema/emma.crt"); // path to ssl
 rethinkDdConnection.keepConnection();
+
 
 // run schedule
 var createHeatMap = require("./schema/schedule-create-heatmap");
@@ -28,9 +33,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
-// app.use(express.static(path.resolve('./public')));
 app.use(express.static('public'));
+
 // api
 app.use(cors());
 app.use('/', indexRouter);
@@ -55,7 +59,7 @@ app.use(function(err, req, res, next) {
 
 var port = process.env.PORT || 8080 ;
 // var port = 5000;
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`App listening on port ${port}!`));
 
 setInterval(function() {
   console.log('wakeup - server - heroku');

@@ -232,11 +232,6 @@ function writeFile(pathname, content) {
   });
 }
 
-function saveImg(base64Str, path, optionalObj) {
-  let imageInfo = base64ToImage(base64Str, path, optionalObj);
-  console.log(imageInfo);
-}
-
 getCurrentTime = formatType => {
   let currentdate = new Date();
   let datetime;
@@ -258,24 +253,29 @@ getCurrentTime = formatType => {
     case "full-time":
       datetime =
         currentdate.getFullYear() +
-        ( (currentdate.getMonth() + 1 < 10) ? ("0" + (currentdate.getMonth() + 1)) : (currentdate.getMonth() + 1)  ) +
-        ( (currentdate.getDate() + 1 < 10) ? ("0" + (currentdate.getDate() + 1)) : (currentdate.getDate() + 1)  ) + "_"
-        currentdate.getHours();
+        (currentdate.getMonth() + 1 < 10
+          ? "0" + (currentdate.getMonth() + 1)
+          : currentdate.getMonth() + 1) +
+        (currentdate.getDate() + 1 < 10
+          ? "0" + (currentdate.getDate() + 1)
+          : currentdate.getDate() + 1) +
+        "_";
+      currentdate.getHours();
       break;
   }
 
   return datetime;
 };
 
-function insertHeatmapTable(r, connection, heatmapData, heatmapType) {
+function insertHeatmapTable(r, connection, linkImg, heatmapType) {
   if (connection || connection.open == true) {
     r.table("heatmaps")
       .insert([
         {
           type: heatmapType,
-          create_at: getCurrentTime('basic'),
+          create_at: getCurrentTime("basic"),
           date: Date.now(),
-          heatmap: heatmapData
+          link_img: linkImg
         }
       ])
       .run(connection, (err, res) => {
@@ -297,18 +297,17 @@ async function mainFunction() {
     //let provinceList = await readFile("./public/json/provinces.json"); // dữ liệu tỉnh
     let enviObjects = await readFile("./public/json/envi_object.json"); // tên thông số
     let boundaryList = await getAllBoundingBox(); // bounding box của các tỉnh có dữ liệu
-    let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại;
+    let currentWeatherData = await getCurrentWeatherData(); // dữ liệu các tỉnh tại thời điểm hiện tại; currentWeatherData = [dữ liệu các trạm theo tỉnh, dữ liệu tất cả các điểm]
     currentWeatherData[0].forEach((weatherData, index) => {
       // kiểm tra tỉnh này có trong danh sách cáct tỉnh đủ điều kiện tạo  chưa
       let resCheckProvince = getBoundingOfProvinceById(
         weatherData.districtId,
         boundaryList
       );
-
       if (
         resCheckProvince.result === true &&
-        resCheckProvince.boundary.length > 0 &&
-        index == 0
+        resCheckProvince.boundary.length > 0 
+        // && index == 0 // Lấy hà nội thôi
       ) {
         // nếu tỉnh nằm  trong các tỉnh đã có dữ liệu boundary => tạo heat map
         // boundary của tỉnh sẽ vẽ canvas
@@ -382,7 +381,6 @@ async function mainFunction() {
         while (typeIndex < enviObjects.length) {
           let knownPoints = [],
             heatMapImg = "";
-            console.log(enviObjects[typeIndex].name);
           switch (enviObjects[typeIndex].name) {
             case "Temp":
               knownPoints = knownTempPoints;
@@ -408,22 +406,25 @@ async function mainFunction() {
           );
 
           let rethinkConnection = rethinkdbdash.getConnection();
-          let r = rethinkdbdash.r;
-          // insertHeatmapTable(
-          //   r,
-          //   rethinkConnection,
-          //   heatMapImg,
-          //    enviObjects[typeIndex].name
-          // );
 
-          let imgName = weatherData.districtId + "-" + getCurrentTime('full-time') + "-" + enviObjects[typeIndex].enviobjectid;
-          saveImg(heatMapImg, "./public/images/", {
+          let r = rethinkdbdash.r;
+
+          let imgName =  weatherData.districtId +  "-" +  getCurrentTime("full-time") +  "-" +  enviObjects[typeIndex].enviobjectid;
+
+          // lưu ảnh trong thư mục thành công thì update vào db
+          let imageInfo = base64ToImage(heatMapImg, "./public/images/", {
             fileName: imgName,
             type: "jpg"
           });
-
+         
+          insertHeatmapTable(
+            r,
+            rethinkConnection,
+            imageInfo.fileName,
+            enviObjects[typeIndex].name
+          );
           //writeFile("./public/json/heatmap.txt", heatMapImg);
-          console.log("heatMap created");
+
           typeIndex++;
         }
       }
@@ -434,10 +435,11 @@ async function mainFunction() {
 }
 
 let runTaskDrawHeatMap = () => {
-  // schedule.scheduleJob({ start: startTime, rule: "15 * * * *" }, function() {
-  //   console.log("run-draw-heatmap");
-  //   mainFunction();
-  // });
+  schedule.scheduleJob({ start: startTime, rule: "15 * * * *" }, function() {
+    console.log("run-draw-heatmap");
+    mainFunction();
+  });
+  
   // schedule.scheduleJob(
   //   { start: startTime, rule: "*/30 * * * * *" },
   //   function() {
@@ -446,7 +448,7 @@ let runTaskDrawHeatMap = () => {
   //   }
   // );
 
-  mainFunction();
+  // mainFunction();
 };
 
 module.exports.runTaskDrawHeatMap = runTaskDrawHeatMap;

@@ -50,4 +50,6 @@ router.get("/current-day", (request, response) => {
 });
 
 // http://localhost:8080/images/a.png
+// https://pam-air.herokuapp.com/images/hnoi-20190807_-_2_0_SHT1X.jpg
+
 module.exports = router;

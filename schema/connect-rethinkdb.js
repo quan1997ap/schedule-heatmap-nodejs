@@ -1,17 +1,17 @@
 var fs = require("fs");
 var r = require("rethinkdbdash")({
   pool: false,
-  // cursor: true,
   ssl: true
 });
+var environment = require("../config/config");
 
 // rethink Option
-const server = "re1.emmasoft.com.vn"; //"127.0.0.1:27017"  REPLACE WITH YOUR DB SERVER
-const database = "quandev"; // REPLACE WITH YOUR DB NAME
-const databaseLocal = "quandev";
-const username = "quandev";
-const password = "quandev-_6543quandev21";
-const port = 28015;
+// const server = "re1.emmasoft.com.vn"; //"127.0.0.1:27017"  REPLACE WITH YOUR DB SERVER
+// const database = "quandev"; // REPLACE WITH YOUR DB NAME
+// const databaseLocal = "quandev";
+// const username = "quandev";
+// const password = "quandev-_6543quandev21";
+// const port = 28015;
 
 var connection = null;
 
@@ -19,7 +19,7 @@ function keepConnection(pathToSSL) {
   setInterval(() => {
     if (!connection) {
       // trường hợp chưa có kết nối tới db => tạo kết nối
-      connectDatabase(pathToSSL);
+      connectRethinkDb(pathToSSL);
     } else if (connection.open == false) {
       // trường hợp kết nối tới db đang close (do db shutdown) => reconnect để open Connect
       console.log("Connection is closed");
@@ -49,7 +49,7 @@ function getDBList() {
   });
 }
 
-function connectDatabase(pathToSSL) {
+function connectRethinkDb(pathToSSL) {
   if (!connection) {
     fs.readFile(pathToSSL, (err, ssl) => {
       // vì gọi từ app.js vào để tìm file emma.crt
@@ -58,7 +58,7 @@ function connectDatabase(pathToSSL) {
         console.log("Can't read/find emma.crt ", err);
       } else {
         let rethinkdbLocalOptions = {
-          db: databaseLocal,
+          db: environment.databaseLocal,
           pool: false,
           buffer: 1000,
           max: 300,
@@ -70,12 +70,12 @@ function connectDatabase(pathToSSL) {
         };
 
         let rethinkdbOptions = {
-          host: server,
-          port: port,
-          db: database,
-          username: username,
-          user: username,
-          password: password,
+          host: environment.rethinkdb.server,
+          port: environment.rethinkdb.port,
+          db: environment.rethinkdb.database,
+          username: environment.rethinkdb.username,
+          user: environment.rethinkdb.username,
+          password: environment.rethinkdb.password,
           pool: false,
           buffer: 1000,
           max: 300,
@@ -97,7 +97,7 @@ function connectDatabase(pathToSSL) {
               // gặp lỗi trong quá trình connect => hủy connection và kết nối lại tới database (GÁN NULL ĐỂ CHECK CHO DỄ :))
               connection.close();
               connection = null;
-              connectDatabase(pathToSSL);
+              connectRethinkDb(pathToSSL);
             } catch (closeConnectionError) {
               console.log("closeConnectionError");
             }
@@ -115,6 +115,6 @@ function getConnection() {
 module.exports = {
   r,
   getConnection,
-  connectDatabase,
+  connectRethinkDb,
   keepConnection
 };
