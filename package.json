@@ -26,6 +26,6 @@
     "pug": "2.0.0-beta11",
     "rethinkdb": "^2.3.3",
     "rethinkdbdash": "^2.3.31",
-    "validator": "^11.0.0"
+    "validator": "^13.7.0"
   }
 }
